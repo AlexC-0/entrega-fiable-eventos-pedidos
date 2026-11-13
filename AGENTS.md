@@ -10,19 +10,35 @@ Lee README.md, docs/PROJECT_BRIEF.md, docs/DECISION-COLA.md y docs/STATUS.md.
 Redacta principalmente en castellano. No hay sincronización automática con
 ChatGPT navegador.
 
-Los Encargos 01 y 02 están publicados por Alex. Referencia verificada al iniciar
-el Encargo 03: ca1740b0c515354250f54abf7213c91fff5a7b9a.
-Alex ha delegado la decisión y autorizado una cola mínima propia en PostgreSQL:
-sin purga automática por antigüedad y con seis intentos totales como máximo.
-pg-boss queda exclusivamente como experimento histórico reproducible; no ejecutar
-dos mecanismos de entrega sobre los mismos eventos ni repetir su evaluación completa.
+Los Encargos 01, 02 y 03 están publicados por Alex. Referencia verificada al iniciar
+el Encargo 04: 1ef64e872453875811111fda8840bd63193ef5c3.
+El producto utiliza exclusivamente cola propia PostgreSQL, sin purga automática y
+con seis intentos totales como máximo. pg-boss queda como experimento histórico;
+no ejecutar dos mecanismos sobre los mismos eventos ni repetir su evaluación.
 
-El Encargo 03 abarca migraciones versionadas y operaciones de evento inmutable,
-entrega única e historial de intentos, registro atómico, reservas, finalización,
-recuperación y pruebas reales aisladas. Consulta docs/NUCLEO-COLA.md.
-No implementar todavía API HTTP, autenticación, consultas HTTP, receptor de negocio,
-trabajador continuo, panel, reintento manual, prioridades, múltiples destinos,
+El Encargo 04 abarca recepción HTTP autenticada, consulta individual, salud,
+disponibilidad, configuración, base de desarrollo, migración explícita y pruebas
+reales. Lee también docs/HTTP.md y docs/NUCLEO-COLA.md.
+Conservar intacta la migración 001 publicada y reutilizar registrar().
+Separar aplicación, arranque, validación/autenticación y persistencia.
+No implementar trabajador ni envío externo, receptor de negocio, historial por
+HTTP, listado/paginación, panel, reintento manual, prioridades, múltiples destinos,
 purga, despliegue ni CI nueva. No avanzar al siguiente encargo.
+
+POST /eventos aplica el contrato cerrado de docs/HTTP.md, máximo 64 KiB,
+JSON UTF-8 sin compresión, sin coerción ni normalización. Autenticar antes del parser.
+Esperar registrar() y su COMMIT antes de responder 202; duplicado 200 y conflicto 409.
+Credenciales Bearer diferentes para recepción y consulta; sin valores predeterminados.
+No registrar tokens, cabeceras Authorization, cuerpos o errores SQL originales.
+Errores JSON seguros y estables; distinguir indisponibilidad 503 de fallo interno 500.
+GET /salud no depende de la base; GET /listo comprueba la persistencia requerida.
+Sin cookies, sesiones ni CORS permisivo. Escuchar únicamente en 127.0.0.1.
+
+La base de desarrollo entrega_fiable_eventos_pedidos está separada de la de pruebas.
+DATABASE_URL es del rol p03_api, ordinario y sin permisos de creación.
+MIGRATION_DATABASE_URL pertenece al rol p03_migracion y solo sirve al comando
+db:migrate. db:prepare conserva credenciales y crea únicamente recursos propios
+ausentes. La API nunca crea bases, esquemas ni tablas al arrancar.
 
 ## Garantías del núcleo
 
@@ -47,12 +63,12 @@ No modificar una migración publicada: añadir una versión posterior.
 Un único paquete raíz privado y un único package-lock.json.
 Node 24; npm 11.21.2 mediante `npx --yes --package=npm@11.21.2 npm`.
 TypeScript estricto, ESM/NodeNext e imports internos .js.
-pg es dependencia de ejecución; pg-boss permanece en devDependencies del experimento.
+pg y Express 5 son dependencias de ejecución; pg-boss permanece en devDependencies del experimento.
 Instala solo dependencias usadas; comprueba engines/peers; no uses --force ni
 --legacy-peer-deps. No cambies software ni configuración global.
 
 Ante cambios de núcleo: instalación reproducible si cambian dependencias,
-typecheck, build y test:core con PostgreSQL real. Una base ausente debe fallar,
+typecheck, build, test:core y test:http con PostgreSQL real. Una base ausente debe fallar,
 nunca omitir casos. Distingue muerte real de procesos, vencimientos de fixtures
 y pruebas temporales aceleradas. No atribuyas al receptor garantías no comprobadas.
 En documentación revisa contenido, enlaces, cifras y diff --check.

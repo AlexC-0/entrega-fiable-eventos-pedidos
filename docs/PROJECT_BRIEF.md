@@ -1,11 +1,15 @@
 # Proyecto 03 — Alcance vigente y propuesta futura
 
-El Encargo 03 autoriza y concreta el núcleo de cola propia PostgreSQL, tras la
-decisión delegada por Alex. Persistencia, identidad, estados, seis intentos,
-conservación sin purga y política temporal están implementados y probados según
-[NUCLEO-COLA](NUCLEO-COLA.md) y [STATUS](STATUS.md).
-El resto del contrato HTTP y del receptor sigue siendo propuesta para futuros
-encargos; documentarlo no autoriza implementarlo ahora.
+El Encargo 04 implementa recepción HTTP autenticada y consulta individual sobre
+el núcleo PostgreSQL aprobado y publicado en el Encargo 03.
+El [contrato HTTP](HTTP.md) concreta campos, validación, límites, errores y permisos.
+La recepción conserva el sobre completo validado, confirma persistencia antes del
+202 y deja la entrega pendiente. Las consultas devuelven estado, contador y fechas.
+GET /salud y GET /listo distinguen proceso vivo de persistencia disponible.
+
+No se implementa aún trabajador, envío al destinatario ni receptor de negocio.
+La propuesta de envío y deduplicación remota siguiente se conserva para otro encargo.
+Documentarla no autoriza a avanzar automáticamente.
 
 ## Objetivo y límites
 
@@ -25,16 +29,19 @@ Una confirmación por pedido en V1.
 - Mismo eventoId con contenido distinto: conflicto.
 - Nuevo eventoId para un pedido ya confirmado: conflicto.
 - Evento y trabajo pendiente en la misma transacción, confirmada antes del HTTP 202.
-- Consultas autenticadas de eventos, estado e intentos.
+- Consulta individual autenticada de estado, contador y fechas; historial por HTTP pendiente.
 - Credenciales diferentes de recepción, consulta y entrega, en variables de entorno.
 
-Pendiente concretar validaciones HTTP, tamaños, respuesta a duplicados, paginación,
-contrato de errores y rutas. El núcleo ya compara contenido con igualdad jsonb:
-ignora orden de claves de objetos, conserva orden de arrays e incluye campos extra.
-La adaptación al contrato HTTP se decidirá expresamente. La identidad se conserva
-junto a la entrega y el historial, sin eliminación por antigüedad.
+Contrato concretado en [HTTP](HTTP.md): JSON UTF-8 hasta 64 KiB, propiedades cerradas,
+UUID canónico minúsculo, fecha UTC real, identificadores ASCII de 1–100 caracteres,
+1–100 líneas con SKU únicos y cantidad entera 1–1.000.000. Sin coerción ni trim.
+200 para duplicado, 202 tras COMMIT y 409 para conflicto. Bearer diferentes para
+recepción/consulta. GET individual no expone tokens ni cuerpo completo.
+El núcleo compara el sobre completo mediante jsonb; no importa el orden de claves,
+sí el de líneas. No se eliminan identidades, entregas ni historial por antigüedad.
+Listado, paginación e historial por HTTP quedan fuera de este encargo.
 
-## Receptor y confirmación
+## Receptor y confirmación — propuesta futura
 
 El receptor debe confirmar en una única transacción su registro de deduplicación
 y la preparación ficticia del pedido. Confirma con HTTP 200 y un recibo del mismo
@@ -51,7 +58,7 @@ un código HTTP ni afirmar que el receptor no aplicó el evento.
 
 Registrar cada intento antes de enviar. Una reserva interrumpida consume
 presupuesto. Máximo de seis intentos, incluido el inicial, y timeout HTTP inicial
-de cinco segundos, aún sin implementar HTTP. Reserva inicial del núcleo: 30 s.
+de cinco segundos, aún sin implementar el envío HTTP. Reserva inicial del núcleo: 30 s.
 Bases aprobadas: 5, 10, 20, 40 y 80 segundos, con jitter entre 0 y 20 %.
 El núcleo acepta una fecha mínima absoluta y toma el máximo con el backoff.
 Analizar Retry-After en HTTP 429 y definir fechas/límites corresponde a otra fase.
@@ -74,5 +81,6 @@ Separar ejecución de cola, reserva de intento y envío HTTP realmente observado
 Encargo 01: base y propuesta. Encargo 02: experimento pg-boss publicado, conservado
 como histórico. Encargo 03: migraciones y núcleo propio con pruebas PostgreSQL.
 La decisión, sus motivos y costes están en [DECISION-COLA](DECISION-COLA.md).
-No hay aún recepción HTTP, autenticación, consultas HTTP, receptor ni trabajador
-continuo. El siguiente encargo será recepción HTTP autenticada sobre este núcleo.
+Encargo 04: recepción HTTP autenticada, consulta individual y entorno de desarrollo
+separado con migración explícita. No hay receptor ni trabajador continuo.
+El siguiente encargo será trabajador HTTP y receptor idempotente.

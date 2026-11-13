@@ -1,3 +1,64 @@
+# Verificación vigente — recepción HTTP y núcleo PostgreSQL
+
+El Encargo 04 conserva test:core (20 casos) y añade test:http (22 casos).
+Usar npm 11.21.2 y seguir [README](../README.md): ci, PostgreSQL propio,
+typecheck, build, test:core y test:http. No repetir test:queue para esta entrega.
+Las suites fallan explícitamente sin TEST_DATABASE_URL o sin PostgreSQL real.
+
+## Casos HTTP
+
+Código: [http/http.test.ts](http/http.test.ts).
+Servidor HTTP real sobre 127.0.0.1 y puerto efímero, Express compilado y núcleo real.
+Credenciales aleatorias por ejecución; fixtures y guardas compartidos con el núcleo.
+Cada caso con persistencia crea un esquema propio en la base _test, aplica la
+migración publicada y cierra HTTP, hijos y pools antes de eliminar solo ese esquema.
+No se borra desarrollo ni se alteran credenciales de la API de desarrollo.
+
+| Caso | Evidencia |
+| --- | --- |
+| 01 | Salud y disponibilidad mínimas; sin caché, cookies, cabecera Express o CORS permisivo |
+| 02 | 202, sobre completo persistido, una entrega pendiente e intento cero; consulta sin tokens |
+| 03 | Duplicado equivalente con claves reordenadas: 200, sin filas nuevas |
+| 04 | Seis solicitudes concurrentes: una creación y cinco duplicados |
+| 05 | Conflictos por contenido, UUID/pedido y orden de líneas |
+| 06 | Entradas inválidas, campos desconocidos y límites rechazados sin persistir |
+| 07 | Límites inclusivos válidos y calendario real, sin normalización de fechas |
+| 08 | Autenticación antes del parser y permisos separados, 401/403 |
+| 09 | JSON mal formado 400 frente a valor fuera de contrato 422 |
+| 10 | Content-Type, charset, compresión y bytes UTF-8 |
+| 11 | 64 KiB inclusive; exceso con Content-Length y transferencia segmentada |
+| 12 | Consulta inexistente, UUID inválido y ruta desconocida |
+| 13 | Error SQL al crear entrega: rollback, 500 y ninguna falsa aceptación |
+| 14 | Trigger diferido bloquea COMMIT real: no hay 202 mientras espera |
+| 15 | Error durante COMMIT diferido: 500 y ausencia de evento/entrega |
+| 16 | Puerto PostgreSQL inaccesible: salud 200, listo/POST/GET 503 |
+| 17 | Reinicio real de proceso HTTP: conserva pendiente y deduplicación |
+| 18 | Cierre repetido libera servidor y pool; puerto deja de aceptar conexiones |
+| 19 | Arrancar sin esquema no hace DDL; listo indica 503 |
+| 20 | Respuestas y logs no filtran tokens/cuerpo, ni aunque SQL incluya un token |
+| 21 | Configuración exige tokens distintos y rechaza URL de pruebas |
+| 22 | Cero esquemas y conexiones HTTP residuales |
+
+El caso 14 usa un bloqueo asesor y un trigger DEFERRABLE INITIALLY DEFERRED
+sobre la entrega del fixture. La consulta externa no ve el evento y HTTP no responde
+hasta liberar el COMMIT. No es un mock de registrar().
+El caso 17 cierra e inicia procesos hijos reales; en este encargo se prueba reinicio
+ordenado de la API. Las muertes abruptas del trabajador siguen en test:core.
+El caso 16 provoca conexión rechazada a un puerto local libre; no detiene el cluster
+compartido durante la suite.
+
+Las variantes de un caso y las repeticiones no se cuentan como casos independientes:
+42 casos distintos entre núcleo y HTTP. Sin HTTP a destinatarios ni efecto de negocio.
+No se prueban carga, TLS, despliegue o idempotencia remota.
+Resultados de la ejecución y demostración con rol restringido en [STATUS](../docs/STATUS.md).
+
+---
+
+## Registro del Encargo 03 y su catálogo de núcleo
+
+Se conserva debajo el registro anterior. Sus afirmaciones sobre ausencia de HTTP
+describen el alcance de aquella entrega; el catálogo de test:core sigue vigente.
+
 # Pruebas del núcleo propio — Encargo 03
 
 Código: [tests/core/queue.test.ts](core/queue.test.ts).

@@ -9,6 +9,7 @@
   },
   "include": [
     "core/**/*.ts",
+    "http/**/*.ts",
     "../src/**/*.ts"
   ]
 }

@@ -1,3 +1,15 @@
+# Continuidad — Encargo 04
+
+El Encargo 03 está publicado en
+[1ef64e8](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/1ef64e872453875811111fda8840bd63193ef5c3).
+La decisión de cola propia se conserva. Este encargo añade recepción y consulta
+[HTTP autenticadas](HTTP.md) sobre registrar(), sin otro motor ni envíos externos.
+La próxima fase será trabajador HTTP y receptor idempotente.
+
+El registro siguiente conserva la decisión y el estado de sus encargos anteriores.
+
+---
+
 # Decisión vigente — cola propia PostgreSQL
 
 13 de noviembre de 2026. Alex delegó la decisión técnica y autorizó el

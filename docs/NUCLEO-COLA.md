@@ -1,3 +1,17 @@
+# Continuidad del núcleo — Encargo 04
+
+La migración 001 y las operaciones de cola publicadas permanecen intactas.
+La nueva [capa HTTP](HTTP.md) adapta el sobre validado a registrar() y añade
+consulta individual, sin reservar ni enviar entregas.
+La migración de desarrollo ahora se ejecuta explícitamente con db:migrate;
+las pruebas siguen usando esquemas efímeros. El rol API tiene SELECT/INSERT
+necesarios y carece de permisos de creación.
+
+El texto siguiente describe el núcleo verificado en el Encargo 03. Las referencias
+a HTTP futuro corresponden al alcance de aquella entrega, no al estado global actual.
+
+---
+
 # Núcleo persistente — Encargo 03
 
 El producto usa exclusivamente una cola propia PostgreSQL. Su interfaz TypeScript

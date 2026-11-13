@@ -16,15 +16,22 @@
     "db:experiment": "node scripts/database-experiment.mjs",
     "test:guards": "node --test dist-experiment/guards.test.js",
     "db:portable": "node scripts/database-portable.mjs",
-    "test:core": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-tests/tests/core/queue.test.js"
+    "test:core": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-tests/tests/core/queue.test.js",
+    "test:http": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-tests/tests/http/http.test.js",
+    "db:prepare": "node scripts/database-development.mjs prepare",
+    "db:migrate": "node scripts/database-development.mjs migrate",
+    "start": "node --env-file-if-exists=.env dist/server/main.js",
+    "demo": "node --env-file-if-exists=.env scripts/demo.mjs"
   },
   "devDependencies": {
+    "@types/express": "5.0.6",
     "@types/node": "24.19.2",
     "@types/pg": "8.23.1",
     "pg-boss": "12.38.2",
     "typescript": "7.0.2"
   },
   "dependencies": {
+    "express": "5.3.0",
     "pg": "8.23.1"
   }
 }

@@ -1,5 +1,201 @@
 # Estado del Proyecto 03
 
+## Encargo 04 — recepción HTTP autenticada y consulta individual completadas
+
+13 de noviembre de 2026. Se implementó la recepción y consulta sobre el núcleo
+PostgreSQL existente. No hay envío externo ni trabajador: las entregas aceptadas
+permanecen pendientes. La selección de cola no se reabrió; pg-boss sigue histórico.
+
+### Repositorio y continuidad
+
+Ruta exclusiva: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+Inicio: main...origin/main limpio, sin cambios locales.
+HEAD, origin/main y git ls-remote origin refs/heads/main coincidían en
+[1ef64e872453875811111fda8840bd63193ef5c3](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/1ef64e872453875811111fda8840bd63193ef5c3),
+«feat: implementar núcleo de cola propia en PostgreSQL».
+El Encargo 03 está publicado por Alex. Origin sigue siendo
+https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
+
+Final: misma rama, HEAD y remoto; cambios locales sin staging.
+No se ejecutaron staging, commit, push, cambios de remotos, tags, publicación o
+despliegue. No se inspeccionaron ni modificaron proyectos anteriores.
+Los resultados de este apartado corresponden al árbol local del Encargo 04,
+no se atribuyen al commit previo ni a una CI remota.
+
+### Cambios y versiones
+
+Añadidas dependencias exactas Express 5.3.0 y @types/express 5.0.6.
+Express declara Node >=18; se usa Node 24.13.0.
+npm efectivo 11.21.2 mediante npx; npm global 11.6.2 conservado.
+TypeScript 7.0.2, pg 8.23.1, @types/pg 8.23.1, @types/node 24.19.2
+y PostgreSQL portátil 18.7 se conservan.
+pg-boss 12.38.2 queda exclusivamente como devDependency del experimento.
+Un package.json privado y un lockfile raíz, sin force/legacy-peer-deps.
+
+Archivos nuevos:
+
+- src/http/app.ts, auth.ts, validation.ts y errors.ts: aplicación, contrato,
+  autenticación por permiso y errores JSON seguros.
+- src/persistence/event-store.ts y errors.ts: consulta individual y comprobación
+  de persistencia; las excepciones persistentes no dependen de Express.
+- src/server/config.ts, runtime.ts y main.ts: configuración, arranque loopback y
+  cierre de HTTP/pool. Importar main no inicia nada.
+- scripts/database-development.mjs: preparación de desarrollo y migración explícita.
+- scripts/demo.mjs: demostración reutilizando evento ficticio y sin mostrar secretos.
+- tests/http/support.ts, server-child.ts y http.test.ts: pruebas HTTP/SQL reales.
+- docs/HTTP.md: contrato, permisos, configuración, respuestas y límites.
+
+Actualizados: package.json, package-lock.json, tests/tsconfig.json, .env.example,
+AGENTS.md, README.md, docs/PROJECT_BRIEF.md, docs/STATUS.md, docs/DECISION-COLA.md,
+docs/NUCLEO-COLA.md y tests/README.md.
+
+Sin cambios en src/queue, migración 001 publicada, transacciones/migrador del núcleo,
+scripts portátiles/Docker existentes, experiments/cola ni .gitattributes.
+Los registros previos de STATUS, DECISION-COLA, NUCLEO-COLA y tests/README
+se conservan como históricos.
+
+### Operaciones y garantías
+
+| Operación | Resultado |
+| --- | --- |
+| POST /eventos | RECEPCION_TOKEN; 202 creado tras registrar()/COMMIT; 200 duplicado; 409 conflicto |
+| GET /eventos/:eventoId | CONSULTA_TOKEN; identificadores, estado, contador y fechas; 404 inexistente |
+| GET /salud | 200 vivo; independiente de PostgreSQL |
+| GET /listo | 200 listo si la persistencia requerida está preparada; 503 ante indisponibilidad o esquema no preparado |
+
+Validación cerrada del sobre, UUID canónico minúsculo, calendario UTC real,
+identificadores ASCII 1–100, 1–100 líneas/SKU únicos y cantidad 1–1.000.000.
+Máximo 64 KiB, JSON UTF-8, sin compresión, coerción ni trim.
+Autenticación anterior al parser, Bearer distintos, 401 desconocido y 403 sin permiso.
+No hay cookies, sesiones ni CORS permisivo; respuestas no-store.
+
+El contenido persistido es el sobre validado completo, usando registrar() existente.
+Se conserva igualdad jsonb: claves de objeto reordenadas no cambian equivalencia;
+reordenar líneas sí. Consulta sin cuerpo completo, token de reserva o conexión.
+Los errores tienen código estable/mensaje seguro. Los fallos SQL inesperados son
+500, no 503 indiscriminadamente. No se emiten errores originales ni stacks a logs.
+
+202 acredita aceptación persistida. Pendiente conserva trabajo aún no reservado.
+Confirmar entrega exigirá trabajador y recibo válido del receptor en otro encargo.
+
+### Preparación y recursos
+
+Se reutilizó el cluster portátil propio, sin initdb ni cambios Docker/WSL.
+Puerto PostgreSQL 127.0.0.1:55434.
+Base de desarrollo creada explícitamente: entrega_fiable_eventos_pedidos.
+La base entrega_fiable_eventos_pedidos_test y sus roles/credenciales se conservaron.
+
+Nuevos roles ordinarios:
+
+- p03_migracion: propietario de desarrollo/esquema p03_app y migrador explícito.
+- p03_api: USAGE del esquema, SELECT de evento/entrega/migracion e INSERT de
+  evento/entrega; sin superusuario, CREATEDB, CREATEROLE ni CREATE en base/public/p03_app.
+
+Se verificaron esos privilegios conectando realmente como p03_api.
+db:prepare genera contraseñas/tokens criptográficos ausentes en archivos privados.
+db:migrate aplica/verifica la migración 001 sin alterar su SQL; no se necesitó
+otra migración. La API no ejecuta DDL al arrancar.
+Preparación y migración repetidas conservaron SHA-256 de .env y development.json.
+Las credenciales previas no se sustituyeron.
+
+Demostración real en desarrollo con rol restringido:
+primero 202/creado, GET pendiente/intentos 0; después de cerrar y reiniciar API,
+200/duplicado del mismo evento, todavía pendiente/intentos 0.
+Un evento y una entrega ficticios permanecen para repetir npm run demo.
+.local/demo-evento.json conserva su identidad, sin incluir credenciales.
+
+### Comandos y resultados reales
+
+Prefijo npm: npx --yes --package=npm@11.21.2 npm.
+
+| Comprobación | Resultado |
+| --- | --- |
+| view express / @types/express | Versiones y engines/dependencias contrastados antes de instalar |
+| install --save-exact / --save-dev --save-exact | Express/tipos añadidos con lockfile único |
+| ci | 103 paquetes reinstalados, 104 auditados; cero vulnerabilidades informadas |
+| SHA-256 de package-lock antes/después de ci | Idéntico |
+| ls --depth=0 | Dependencias fijadas, sin conflictos informados |
+| run typecheck y run build | Correctos, incluida revisión final |
+| node --check de preparador de desarrollo y demo | Correctos |
+| Importar dist/server/main.js | Proceso finaliza sin abrir servidor |
+| db:prepare y db:migrate repetidos | Correctos; credenciales y .env conservados |
+| Demostración HTTP en desarrollo, antes/después de reiniciar | 202/200; pendiente; cero intentos |
+| run test:core | 20/20, cero fallos/cancelados/omitidos; 13,550 s |
+| run test:http inicial | 22/22; cero fallos/cancelados/omitidos; 9,897 s |
+| run test:http tras ci | 22/22; cero fallos/cancelados/omitidos; 10,496 s |
+| run test:http revisión final | 22/22; cero fallos/cancelados/omitidos; 10,478 s |
+| Control HTTP sin TEST_DATABASE_URL | Código 1, error explícito, sin omisiones |
+| Control HTTP con PostgreSQL detenido | Código 1, error explícito, sin omisiones |
+| Residuos tras suites | Cero esquemas de fixtures; cero conexiones HTTP residuales |
+| db:portable stop / status | Instancia propia detenida y datos conservados |
+| Procesos/puertos finales | Cero procesos propios restantes; sin listeners en 3003/55434 |
+| git diff --check y revisión de archivos nuevos | Correctos, sin espacios finales ni marcadores de conflicto |
+| Enlaces, UTF-8 e histórico | 48 enlaces locales válidos; codificación correcta; registros previos íntegros |
+| Secretos y exclusiones | Sin coincidencias con credenciales locales en archivos publicables; .env/.local/compilados ignorados |
+| Estado Git final | 26 archivos cambiados, staging vacío, main y HEAD 1ef64e8 conservados |
+
+Total: **42 casos distintos**, 20 de núcleo y 22 HTTP. No se suman repeticiones ni
+variantes de contrato como casos independientes. La última ejecución HTTP siguió
+a la separación de errores persistentes/HTTP y al control de salida temprana del
+hijo de pruebas. No se repitió pg-boss ni se modificó su experimento.
+
+La suite HTTP usa PostgreSQL real, esquema nuevo por fixture, servidor real y
+credenciales aleatorias. Consulta current_database antes de preparar o limpiar.
+El caso 14 retiene realmente COMMIT con un trigger diferido: no aparece respuesta
+202 ni evento visible hasta liberarlo. El caso 15 falla durante COMMIT y deja
+cero filas. El 13 provoca error SQL al crear la entrega y también revierte todo.
+El 16 provoca una conexión real rechazada a un puerto local sin PostgreSQL.
+El 17 cierra e inicia procesos hijos HTTP sobre el mismo esquema y comprueba
+persistencia. El 22 comprueba ausencia de esquemas y conexiones residuales.
+Detalles y catálogo completo en [tests/README](../tests/README.md).
+
+### Estado final, límites y próximo paso
+
+API y PostgreSQL detenidos. Se conservan la base de desarrollo, esquema, roles,
+un evento ficticio pendiente, archivos privados y datos del cluster.
+No queda trabajador, servidor HTTP ni proceso hijo de prueba activo.
+Comandos de preparación, migración, arranque, demostración y parada en
+[README](../README.md); contrato y errores en [HTTP](HTTP.md).
+
+Sin bloqueos pendientes para este alcance.
+No hay trabajador/envío externo, receptor, historial por HTTP, listado/paginación,
+reintento manual, purga, panel, frontend, TLS/despliegue ni CI nueva.
+No se ha demostrado idempotencia del efecto en el receptor ni rendimiento bajo carga.
+No se usó navegador: la comprobación de la API fue por HTTP real.
+Próximo encargo: trabajador HTTP y receptor idempotente. No se inicia aquí.
+
+### Publicación manual sugerida
+
+Summary:
+
+~~~text
+feat: añadir recepción HTTP autenticada y consulta de eventos
+~~~
+
+Description:
+
+~~~text
+Añadir Express 5 con recepción y consulta individual mediante credenciales Bearer separadas.
+Validar el contrato cerrado de pedido.confirmado, JSON UTF-8 y límite de 64 KiB.
+Reutilizar el núcleo PostgreSQL y responder 202 únicamente tras COMMIT; reconocer duplicados y conflictos.
+Incorporar salud, disponibilidad y errores JSON seguros sin filtrar secretos.
+Preparar desarrollo separado con rol API sin DDL y migración explícita, conservando la migración 001.
+Añadir demostración reproducible y pruebas HTTP con PostgreSQL real, fallos SQL y reinicio de API.
+Verificar 20 pruebas de núcleo y 22 HTTP, instalación reproducible, tipos y compilación.
+Actualizar documentación y dejar los recursos detenidos con datos conservados.
+~~~
+
+Alex realiza exclusivamente staging, commit y push desde GitHub Desktop.
+
+---
+
+## Histórico del Encargo 03
+
+Se conserva el registro anterior. Sus frases sobre recepción HTTP futura,
+publicación pendiente o ausencia de base de desarrollo describen aquella entrega.
+
+# Estado del Proyecto 03
+
 ## Encargo 03 — núcleo persistente implementado y verificado
 
 13 de noviembre de 2026. Alex delegó la decisión y autorizó cola mínima propia

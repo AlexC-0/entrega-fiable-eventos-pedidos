@@ -1,3 +1,106 @@
+# Decisión de cola — evaluación del Encargo 02
+
+13 de noviembre de 2026. **pg-boss 12.38.2 evaluado; adopción pendiente.**
+La base usada fue PostgreSQL portátil 18.7, después del fallo de Docker/WSL
+y la autorización de Alex para continuar sin él.
+
+## Conclusión
+
+| Clasificación | Resultado |
+| --- | --- |
+| Compatible con las garantías probadas | Atomicidad evento/trabajo y reserva/intento; exclusión concurrente; recuperación por supervisión tras muerte de proceso; seis reservas como máximo; protección frente a resultado antiguo; Retry-After transaccional; conservación de historial propio |
+| Compatible solo con ajuste explícito | Usar la política de backoff/jitter de la biblioteca y una retención finita de trabajos pendientes con un límite operativo de parada/conciliación inferior a esa retención |
+| Incompatible con un requisito identificado | Retener indefinidamente todos los trabajos pendientes sin purga automática, usando las opciones públicas evaluadas y supervisión normal |
+| No comprobado | Contenedor Docker; parada de días; permisos mínimos de producción; toda la clasificación HTTP y receptor/efecto de negocio |
+
+**No adoptar pg-boss todavía.** Alex debe decidir si acepta la retención finita
+en la cola (con horizonte y margen definidos), manteniendo el historial propio.
+Si mantiene estrictamente ausencia de purga para pendientes, habrá que evaluar
+otra decisión en un nuevo encargo. No se implementa una cola alternativa.
+
+## Evidencia ejecutable
+
+[queue.test.ts](../experiments/cola/queue.test.ts) pasó 9/9 en dos ejecuciones;
+[guards.test.ts](../experiments/cola/guards.test.ts) pasó 1/1.
+No son pruebas de la V1 completa. Datos detallados en [STATUS](STATUS.md).
+
+- **Transacciones:** send y fetch recibieron el mismo cliente que las escrituras
+  propias. Se provocaron ROLLBACK, cola inexistente y error SQL NOT NULL.
+  No quedó evento sin trabajo ni reserva sin intento.
+- **Recuperación:** consumidor en proceso separado terminado realmente tras
+  confirmar primera y sexta reservas; supervisor de pg-boss siguió activo.
+  Se registraron seis intentos, cuatro HTTP y dos resultados desconocidos.
+  Una nueva instancia concilió agotado aunque el hijo no ejecutó finally.
+- **Ejecución antigua:** complete recibió id/retryCount de la reserva y se
+  verificó affected=1 dentro de la transacción que actualiza el dominio.
+  Si no coincide, rollback; también se comprueba la generación propia.
+- **Retry-After:** fail, findJobs y update con db dentro de una sola transacción;
+  startAfter = máximo entre espera nativa y fecha mínima. Un consumidor separado
+  intentó reservar entre fail y update y no obtuvo el trabajo. HTTP se realizó
+  fuera de transacción. No hay cron propio, segundo planificador ni escritura
+  directa en tablas internas.
+- **Historial:** tablas propias sin cascada desde la cola. Borrar mediante
+  deleteJob un trabajo consolidado no eliminó intento ni estado consultable.
+
+## Límite de retención demostrado
+
+F2 usa retentionSeconds=1 y deleteAfterSeconds=0. La supervisión eliminó un
+trabajo que seguía pendiente, mientras evento y entrega propios permanecieron.
+La conciliación rechazó la ausencia de evidencia en vez de inventar entrega
+o agotamiento. createQueue con retentionSeconds=0 fue rechazado.
+
+La API pública distingue [retención pendiente y terminal](https://pgboss.io/api/jobs):
+cero desactiva el borrado terminal, no la retención de pendientes.
+El paquete instalado lo confirma en dist/types.d.ts (QueueOptions),
+dist/attorney.js (validación >=1) y dist/plans.js (predicado de caducidad).
+Estas fuentes se inspeccionaron, no se modificaron ni ejecutaron como SQL propio.
+
+Aumentar la retención reduce el riesgo operativo, pero no demuestra conservación
+indefinida. Desactivar toda la supervisión también elimina recuperación automática;
+no se usó como solución. No se añaden reencolados desde otra tabla para ocultar
+el problema. Una parada prolongada real no se ha probado.
+
+## API y versiones contrastadas
+
+Instalados pg-boss 12.38.2 (Node >=22.12), pg 8.23.1, @types/pg 8.23.1,
+@types/node 24.19.2, con Node 24.13.0. El peer @opentelemetry/api ^1.9.0
+se resolvió automáticamente a 1.10.0, sin dependencia directa artificial.
+
+Antes del experimento se inspeccionó el tarball de esa versión y después sus
+interfaces instaladas: FetchOptions y UpdateOptions incluyen ConnectionOptions;
+fail acepta options.db; complete admite JobAttempt y devuelve affected;
+findJobs permite consultar failed; supervise es público.
+Se contrastaron [Adapters](https://pgboss.io/api/adapters),
+[Jobs](https://pgboss.io/api/jobs) y las implementaciones distribuidas de
+manager.js. No se dependió únicamente de la documentación viva.
+
+## Backoff observado y siguiente decisión
+
+E usa retryDelay=1, retryBackoff=true. Primer retardo nativo programado:
+1815 ms y 1410 ms en las dos ejecuciones. Intervalos HTTP observados:
+1825/2343 ms y 1445/2864 ms. El 429 indicó dos segundos y ningún tercer
+envío ocurrió antes de la fecha mínima calculada.
+
+Son muestras del perfil acelerado, no una prueba estadística del jitter.
+La fórmula inspeccionada usa para el primer reintento una espera entre una y
+dos veces retryDelay; después duplica el intervalo por reserva.
+Aceptar esta política con retryDelay=5 implica ventanas aproximadas
+5–10, 10–20, 20–40, 40–80 y 80–160 segundos antes de otros límites/Retry-After.
+No se ejecutó ese perfil ni se da por aprobado para V1.
+
+Próximo paso: resolver explícitamente retención y política temporal antes de
+diseñar la API/trabajador definitivos. La prueba demuestra garantías locales
+de persistencia y control; el receptor todavía necesitaría deduplicación
+transaccional de su efecto. No existe garantía universal exactamente una vez.
+
+---
+
+## Histórico: propuesta del Encargo 01
+
+El texto siguiente se conserva como contexto de la evaluación inicial.
+Sus frases sobre instalación o pruebas pendientes describen aquella entrega,
+no el estado vigente.
+
 # Decisión de cola — propuesta pendiente
 
 Fecha de consulta: 13 de noviembre de 2026.

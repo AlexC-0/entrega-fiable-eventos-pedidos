@@ -1,0 +1,27 @@
+name: p03-eventos-prueba
+services:
+  postgres:
+    image: postgres:18.7-bookworm
+    container_name: p03-eventos-postgres
+    labels:
+      proyecto: entrega-fiable-eventos-pedidos
+    environment:
+      POSTGRES_USER: p03_preparacion
+      POSTGRES_DB: entrega_fiable_eventos_pedidos_test
+      POSTGRES_PASSWORD: ${P03_ADMIN_PASSWORD:?Ejecutar npm run db:experiment -- up}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "127.0.0.1:55434:5432"
+    volumes:
+      - datos:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U p03_preparacion -d entrega_fiable_eventos_pedidos_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: "no"
+volumes:
+  datos:
+    name: p03-eventos-postgres-datos
+    labels:
+      proyecto: entrega-fiable-eventos-pedidos

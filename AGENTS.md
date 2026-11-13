@@ -12,15 +12,19 @@ Lee README.md, docs/PROJECT_BRIEF.md, docs/DECISION-COLA.md y docs/STATUS.md.
 Redacta principalmente en castellano. No hay sincronización automática con
 ChatGPT navegador.
 
-El encargo inicial autoriza inspección, base mínima Node.js/TypeScript/npm y
-evaluación documental de cola. Esa base ya está preparada. El contrato funcional
-es una propuesta técnica, no una implementación ni una decisión aprobada.
-No avances automáticamente a la siguiente fase.
+El Encargo 01 está completado y publicado por Alex. El Encargo 02 autoriza
+preparar un PostgreSQL exclusivo, instalar dependencias necesarias y ejecutar
+un experimento reproducible de pg-boss 12.38.2 separado del producto.
+Condiciones a evaluar: atomicidad evento/trabajo y reserva/intento, recuperación,
+presupuesto de seis reservas, protección de resultados y Retry-After sin carreras.
+El contrato completo y la adopción de pg-boss siguen pendientes.
 
-Sin otro encargo, no implementes recepción, consultas, trabajador, reintentos,
-receptor, autenticación, migraciones ni infraestructura. No instales Express,
-pg-boss, ORM o dependencias funcionales para anticipar decisiones pendientes.
-No construyas dos mecanismos de cola.
+Se permite un servidor HTTP mínimo de prueba, consumidores hijos y esquemas
+efímeros. No implementar API pública, autenticación completa, receptor de negocio,
+trabajador definitivo, panel, reintento manual, despliegue ni CI nueva.
+No escribir SQL contra tablas internas de pg-boss ni añadir otro planificador.
+Un resultado negativo demostrado es válido; no cambiar el alcance para hacer pasar
+pruebas ni adoptar otra cola automáticamente. No avanzar al siguiente encargo.
 
 ## Base y verificación
 
@@ -38,11 +42,13 @@ y diff --check. Actualiza STATUS con resultados reales y límites.
 ## Datos y entorno futuro
 
 No uses bases, roles, secretos, binarios privados o scripts de otros proyectos.
-PostgreSQL para Proyecto 03 está pendiente: cualquier preparación de servicios
-requiere un encargo explícito. No arranques Docker o servidores por iniciativa.
+Docker fue la primera opción; tras fallar por WSL, Alex autorizó continuar sin él.
+Se autoriza PostgreSQL portátil 18.7 propio en .local, sin servicio Windows ni
+cambios globales, en 127.0.0.1:55434. No reinicializar el cluster una vez creado.
+Conservar credenciales y datos; detener únicamente los recursos propios al finalizar.
 No instales herramientas globales, reinicialices clusters ni cierres procesos ajenos.
 
-Cuando se autorice integración, exige TEST_DATABASE_URL y comprueba
+Para el experimento, exige TEST_DATABASE_URL y comprueba
 current_database() = entrega_fiable_eventos_pedidos_test antes de escribir.
 Roles ordinarios y esquemas nuevos exclusivos por ejecución, incluido el esquema
 de cola; elimina solo los creados por esa ejecución, después de cerrar HTTP,

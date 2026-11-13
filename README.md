@@ -1,61 +1,105 @@
 # Recepción y entrega fiable de eventos de pedidos
 
-Proyecto 03 de CHAMBA DIARIA. Nombre técnico: `entrega-fiable-eventos-pedidos`.
+Proyecto 03 de CHAMBA DIARIA: `entrega-fiable-eventos-pedidos`.
 
-**Estado: base mínima comprobada; producto sin implementar.** El objetivo futuro
-es persistir eventos de pedidos antes de aceptarlos y gestionar su entrega HTTP
-con recuperación e historial. El contrato detallado y la cola son propuestas
-pendientes de revisión; este trabajo no los da por aprobados.
+**Estado: Encargo 02 evaluado con PostgreSQL real; producto sin implementar.**
+La prueba técnica verifica transacciones, reservas, recuperación, historial y
+Retry-After. La adopción de pg-boss sigue pendiente por el límite de retención
+de trabajos pendientes. No hay API pública, autenticación ni receptor de negocio.
 
-## Preparación local
+Repositorio creado y publicado manualmente por Alex:
+[AlexC-0/entrega-fiable-eventos-pedidos](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos).
+Rama `main`; HEAD, origin/main y consulta remota coincidían en
+`34b953a31f013462258be9e6be419a4698f831f3` al iniciar este encargo.
+El estado previo sin Git se conserva como histórico en STATUS.
 
-Ruta preparada: `C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos`.
-Un único paquete npm privado, Node.js 24 y TypeScript estricto con ESM/NodeNext.
-Comprobado con Node 24.13.0, npm 11.21.2 y TypeScript 7.0.2.
-Se conserva Node instalado, dentro de una rama LTS; no se afirma que su parche
-sea el más reciente. npm se ejecuta con npx, sin actualizar npm global.
+## Entorno utilizado
 
-Desde esta carpeta, en PowerShell:
+Ruta: `C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos`.
+Node 24.13.0, npm 11.21.2 mediante npx, TypeScript 7.0.2,
+pg-boss 12.38.2, pg 8.23.1 y PostgreSQL portátil 18.7.
+Un único paquete raíz privado, lockfile único y ESM/NodeNext estricto.
+El experimento usa node:test y está separado de `src`.
+
+Docker fue la primera opción, pero su motor falló con `WSL update required`.
+Alex autorizó continuar sin Docker. Se cerró Docker Desktop normalmente y se
+preparó una instancia portátil exclusiva, sin actualizar WSL, cambiar
+virtualización, instalar servicios Windows ni reutilizar proyectos anteriores.
+
+## Preparación y reproducción — Windows
+
+Desde esta carpeta:
 
 ~~~powershell
 npx --yes --package=npm@11.21.2 npm ci
+npx --yes --package=npm@11.21.2 npm run db:portable -- up
 npx --yes --package=npm@11.21.2 npm run typecheck
 npx --yes --package=npm@11.21.2 npm run build
+npx --yes --package=npm@11.21.2 npm run test:guards
+npx --yes --package=npm@11.21.2 npm run test:queue
 ~~~
 
-`src/index.ts` es un módulo sin efectos para comprobar el compilador.
-El build genera `dist/index.js`, excluido de Git. No hay servidor, comando
-de arranque funcional, endpoints ni pruebas automatizadas todavía.
-`.env.example` contiene solo nombres previstos y valores vacíos; esta base
-no carga variables de entorno ni necesita PostgreSQL.
+`up` descarga PostgreSQL 18.7-1 Windows x64 desde EDB y verifica el SHA-256
+fijado en el script antes de extraer/ejecutar. En una carpeta nueva prepara el
+cluster exclusivo y genera credenciales privadas. Si ya existe, conserva datos,
+roles y contraseñas; un conflicto se rechaza, no se reinicializa.
+Escucha solo en `127.0.0.1:55434` con SCRAM.
+La base es `entrega_fiable_eventos_pedidos_test`; `p03_preparacion` prepara
+cluster/base/rol y `p03_prueba` ejecuta las pruebas sin superusuario,
+CREATEDB ni CREATEROLE. Tiene CREATE únicamente en la base de pruebas para
+crear los esquemas efímeros del experimento.
 
-## Documentación
+Archivos privados: `.local/portable-postgres/credentials.json`, datos y logs
+dentro de ese directorio, y `.env` con TEST_DATABASE_URL. No compartirlos.
+`.env.example` mantiene variables de producto vacías y explica la variable de
+prueba; no copiarlo sobre el .env generado.
+No hay instalación global ni modificación del PATH.
+
+Al terminar, incluso si una comprobación falla:
+
+~~~powershell
+npx --yes --package=npm@11.21.2 npm run db:portable -- stop
+npx --yes --package=npm@11.21.2 npm run db:portable -- status
+~~~
+
+`stop` conserva datos y credenciales. No borres .local ni ejecutes initdb
+manualmente sobre la instancia preparada.
+
+## Qué comprueba el experimento
+
+Nueve casos reales y un control de configuración. Dos ejecuciones completas
+sin omisiones; el detalle y sus límites están en [tests/README](tests/README.md)
+y [STATUS](docs/STATUS.md).
+Los casos usan esquemas nuevos propios, un consumidor hijo que se termina
+abruptamente y HTTP local efímero. No prueban la futura V1 completa.
+La retención corta del caso F2 provoca un resultado negativo esperado:
+el trabajo pendiente desaparece aunque deleteAfterSeconds sea cero.
+
+La suite exige TEST_DATABASE_URL, consulta current_database antes de escribir
+o limpiar y rechaza otra base o un rol superusuario. Sin PostgreSQL falla.
+Los esquemas propios se eliminan tras cerrar recursos, también ante errores.
+El módulo `src/index.ts` sigue sin comportamiento funcional.
+
+## Alternativa Docker preparada, no ejecutada
+
+`compose.experiment.yml` fija `postgres:18.7-bookworm`, nombre y volumen
+exclusivos y puerto loopback. `npm run db:experiment -- up|stop|status` prepara
+o administra solo esos recursos, mediante el contexto desktop-linux.
+La imagen no se descargó ni el contenedor se creó en esta evaluación:
+no se atribuyen los resultados al contenedor. Su preparación sigue sin verificar.
+
+No ejecutar ambos entornos en el puerto 55434. La presencia de .env con otras
+credenciales provoca rechazo. Cualquier cambio de entorno exige revisar esa
+configuración privada, sin borrar datos ni sustituir contraseñas a ciegas.
+
+## Documentación y publicación
 
 - [Alcance funcional propuesto](docs/PROJECT_BRIEF.md).
-- [Evaluación de cola pendiente](docs/DECISION-COLA.md).
-- [Estado, versiones, comprobaciones y siguiente paso](docs/STATUS.md).
+- [Evaluación y decisión de cola pendiente](docs/DECISION-COLA.md).
+- [Resultados y estado](docs/STATUS.md).
 - [Instrucciones para Codex](AGENTS.md).
-- [Pruebas por desarrollar](tests/README.md).
 
-No se incluyen Express, pg-boss, un driver de base de datos, ORM, receptor,
-trabajador ni infraestructura. Los proyectos anteriores son independientes.
-
-## GitHub Desktop y nomenclatura
-
-La carpeta está preparada **sin inicializar Git**. No tiene rama, commits ni
-remoto; Codex no ha creado ni consultado un repositorio remoto de este proyecto.
-Según el encargo de Alex, tampoco existe aún el remoto.
-
-Alex creará el repositorio local desde GitHub Desktop usando esta misma carpeta,
-evitando otra carpeta anidada con el mismo nombre. Nombre del repositorio:
-`entrega-fiable-eventos-pedidos`. Rama principal prevista: `main`.
-La creación del remoto y la elección de su visibilidad corresponden a Alex.
-
-Descripción sugerida del repositorio:
-
-> Proyecto 03 de CHAMBA DIARIA: recepción y entrega fiable de eventos de pedidos. Base inicial en Node.js y TypeScript; diseño de persistencia, recuperación e historial pendiente.
-
-Antes del primer commit, revisar que solo se incluyen los 12 archivos de la base
-enumerados en STATUS y que quedan fuera `node_modules`, `dist` y archivos privados.
-Summary y Description fieles al trabajo realizado están en STATUS.
-Staging, commits, publicación y push son exclusivamente manuales por Alex.
+Se conserva .gitattributes creado por GitHub Desktop. node_modules, dist,
+dist-experiment, .env y .local quedan fuera de Git.
+Los cambios del Encargo 02 se dejan sin staging; Alex realiza el commit y el push
+desde GitHub Desktop. No hay CI nueva, tags, releases ni despliegue.

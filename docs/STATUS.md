@@ -1,5 +1,228 @@
 # Estado del Proyecto 03
 
+## Encargo 02 — evaluación técnica completada, 13 de noviembre de 2026
+
+La evaluación se completó con PostgreSQL real. El producto sigue sin implementar
+y pg-boss **no se adopta todavía**: hay una condición pendiente sobre la retención
+finita de trabajos en cola. El resultado negativo de F2 forma parte de la evidencia.
+
+### Repositorio y alcance
+
+Ruta exclusiva: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+Inicio limpio en main, HEAD y origin/main:
+34b953a31f013462258be9e6be419a4698f831f3 — Initial commit.
+Origin: https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
+git ls-remote origin refs/heads/main confirmó el mismo SHA remoto en esta sesión.
+El primer intento bajo sandbox falló por schannel/SEC_E_NO_CREDENTIALS; se repitió
+la lectura autorizada sin cambiar Git, remotos ni credenciales.
+
+Alex creó y publicó el repositorio desde GitHub Desktop tras el Encargo 01.
+Inventario inicial: 13 archivos versionados, incluido .gitattributes creado
+por Desktop. Se conserva ese archivo sin cambios. El registro sin Git de la
+entrega original queda abajo como histórico, no como estado actual.
+
+Se amplía AGENTS únicamente para la prueba acotada. src/index.ts,
+PROJECT_BRIEF y la configuración TypeScript del producto se conservan.
+No se implementa API pública, autenticación, receptor de negocio, trabajador
+definitivo, otra cola ni CI. No se inspeccionan ni modifican proyectos anteriores.
+
+### Entorno real y resolución del bloqueo
+
+| Elemento | Versión o resultado utilizado |
+| --- | --- |
+| Node.js | 24.13.0 |
+| npm efectivo | 11.21.2 mediante npx; npm global 11.6.2 conservado |
+| Git | 2.56.1.windows.1 |
+| TypeScript | 7.0.2 |
+| pg-boss / pg | 12.38.2 / 8.23.1 |
+| @types/node / @types/pg | 24.19.2 / 8.23.1 |
+| Peer resuelto automáticamente | @opentelemetry/api 1.10.0; no dependencia directa artificial |
+| PostgreSQL usado | 18.7 portátil Windows x64, distribución EDB 18.7-1 |
+| Docker CLI | 29.9.3; no fue el entorno de las pruebas |
+
+Se intentó iniciar Docker Desktop normalmente. El motor devolvió
+Docker Desktop is unable to start y el log identificó:
+engine linux/wsl failed to start: checking preconditions: WSL update required.
+wsl --status informó que no podía iniciar el servicio y wsl --version no fue
+reconocido. No se actualizaron WSL, virtualización ni servicios del sistema.
+
+Alex autorizó continuar sin Docker. Se cerró Docker Desktop mediante
+docker desktop stop --timeout 15 y se descargó una copia nueva de PostgreSQL
+dentro de .local/portable-postgres del Proyecto 03, sin instalación global.
+
+[ZIP oficial EDB](https://get.enterprisedb.com/postgresql/postgresql-18.7-1-windows-x64-binaries.zip)
+y [SHA-256 publicado](https://get.enterprisedb.com/postgresql/postgresql-18.7-1-windows-x64-binaries.zip.sha256)
+consultados por HTTPS; hash comprobado antes de extraer:
+ead0bbc27fb678fa24dcf86b738981323042abd073c744103bf7f3aed23f9a33.
+El script fija versión y hash. No se reutilizaron binarios ni datos anteriores.
+
+Puerto 55434 libre antes de preparar; escucha solo en 127.0.0.1, SCRAM.
+Cluster nuevo creado una sola vez. Preparación con p03_preparacion y ejecución
+con p03_prueba (NOSUPERUSER, NOCREATEDB, NOCREATEROLE).
+Base exacta entrega_fiable_eventos_pedidos_test, comprobada con
+current_database antes de escribir/limpiar esquemas.
+El preparador usa la base postgres del cluster propio solo para crear base/rol;
+verifica antes current_database y data_directory.
+
+### Dependencias y archivos
+
+Añadidas como devDependencies del experimento, fijadas exactamente:
+pg-boss, pg, @types/pg y @types/node. Sin Express, ORM ni otro runner.
+npm ls comprobó peers; pg-native y binarios TypeScript de otros sistemas son
+opcionales, no conflictos que se hayan ocultado. Sin force/legacy-peer-deps.
+
+Archivos nuevos:
+- compose.experiment.yml: alternativa inicial Docker, preparada pero no ejecutada.
+- scripts/database-experiment.mjs y scripts/database-portable.mjs.
+- experiments/cola/tsconfig.json.
+- experiments/cola/support.ts y consumer.ts.
+- experiments/cola/queue.test.ts y guards.test.ts.
+
+Archivos actualizados:
+- .env.example y .gitignore.
+- package.json y package-lock.json.
+- AGENTS.md y README.md.
+- docs/DECISION-COLA.md y docs/STATUS.md.
+- tests/README.md.
+
+Compilación separada en dist-experiment, excluida de Git.
+El HTTP de laboratorio y el consumidor hijo solo forman parte del experimento.
+
+### Comandos y resultados
+
+Prefijo de npm: npx --yes --package=npm@11.21.2 npm.
+La caché temporal p03-npm-cache se configuró solo para los procesos de esta sesión.
+
+| Comando | Resultado real |
+| --- | --- |
+| view / pack / inspección de interfaces | Versión, engines, peer y API pública revisados antes de construir la prueba |
+| install --save-dev --save-exact ... | 27 paquetes añadidos; 30 auditados; cero vulnerabilidades informadas |
+| ci | 29 paquetes reinstalados; 30 auditados; cero vulnerabilidades informadas |
+| SHA-256 de package-lock antes/después de ci | Idéntico |
+| run typecheck | Producto y experimento correctos |
+| run build | Producto y experimento correctos |
+| node --check de los dos preparadores | Correctos |
+| run test:guards | 1/1 correcto |
+| run test:queue — primera ejecución | 9/9, 0 fallos, 0 omitidos; 22,77 s |
+| run test:queue — segunda ejecución | 9/9, 0 fallos, 0 omitidos; 22,27 s |
+| db:portable up sobre instancia ya preparada | Correcto; conserva cluster, roles y credenciales |
+| db:portable stop / status | Detenida, datos conservados |
+
+La segunda ejecución incluyó además la comprobación de rechazo de
+retentionSeconds=0 en F2. Total: diez casos distintos versionados; no se suman
+repeticiones como casos nuevos. Las cifras pertenecen a los cambios locales
+sin commit de este encargo, no al Initial commit ni a una CI remota.
+
+### Tabla de pruebas y evidencia
+
+| Caso | Resultado | Evidencia real |
+| --- | --- | --- |
+| A | Correcto | COMMIT conserva evento y job; ROLLBACK provocado y cola inexistente no dejan eventos huérfanos |
+| B | Correcto | Error SQL 23502 en intento revierte reserva; dos consumidores concurrentes obtienen una sola reserva |
+| C | Correcto | Procesos hijos terminados con SIGKILL tras primera y sexta reservas; supervisor recupera; seis intentos, cuatro HTTP, dos desconocidos; agotado tras reinicio, sin séptimo envío |
+| D | Correcto | Finalización antigua rechazada antes y después del resultado posterior; cola y generación propia conservadas |
+| E | Correcto | HTTP 503 y 429; fail/findJobs/update atómicos, consumidor intercalado sin reserva y tercer envío posterior a Retry-After |
+| F1 | Correcto | Rol ordinario; cero transacciones abiertas durante HTTP retenido; historial sobrevive a deleteJob |
+| F2 | Limitación demostrada | Retención pendiente de un segundo elimina job sin conciliar pese a deleteAfterSeconds=0; cero rechazado por API |
+| G | Correcto | Conexión real a otra base, postgres, rechazada antes de escribir |
+| H | Correcto | Cero esquemas de experimento residuales tras cada suite |
+| Control de configuración | Correcto | Rechaza variable vacía, URL inválida y nombre de base distinto |
+
+No hay simulación de PostgreSQL ni mocks de pg-boss. El servidor HTTP es
+deliberadamente ficticio: produce respuestas reales de laboratorio, no prepara
+pedidos. Se provocan realmente errores SQL, ROLLBACK, expiración, borrado por
+retención y muerte de procesos; no se sustituye SIGKILL por una excepción del handler.
+
+Dos controles CLI adicionales: sin TEST_DATABASE_URL y con un puerto sin servidor,
+código 1 y mensaje explícito en ambos. No se cuentan como nuevas pruebas de suite.
+
+### Tiempos, límites y conclusión
+
+Perfil acelerado: expiración de reserva 2 s (15 s en HTTP), supervisión/monitor/
+mantenimiento 1 s; timeout HTTP 5 s. RetryLimit=5, seis reservas en total.
+El caso E usa retryDelay=1 y jitter/backoff nativo. Retardo nativo inicial
+observado: 1815 y 1410 ms; intervalos HTTP: 1825/2343 y 1445/2864 ms.
+Retry-After probado como delta de 2 s. No se probó el perfil V1 5/10/20/40/80,
+fechas HTTP, toda la clasificación de errores ni la distribución del jitter.
+
+Compatible con atomicidad, reserva, recuperación y protección probadas.
+Condicionado a aceptar la política nativa y una retención finita con límite
+operativo de inactividad/conciliación.
+Incompatible, en las opciones públicas evaluadas con supervisión normal, con
+retener indefinidamente todos los pendientes sin purga automática.
+Docker y su imagen postgres:18.7-bookworm no se ejecutaron.
+No se demuestra una parada de días mediante estas pruebas cortas.
+
+La conciliación no crea un segundo planificador: solo proyecta un fallo terminal
+de cola en estado propio y conserva desconocido. Si falta el job, rechaza la
+conciliación; no inventa una entrega ni encola otro trabajo.
+No hay transacciones abiertas esperando HTTP ni SQL de escritura de aplicación
+contra tablas internas. El rol ordinario conserva permiso CREATE en la base de
+pruebas para fixtures: no es auditoría de permisos mínimos de producción.
+
+Próximo paso recomendado: decidir explícitamente la política de retención y
+el backoff antes de adoptar pg-boss o iniciar producto. No se adopta otra cola
+automáticamente. La explicación y fuentes están en
+[DECISION-COLA](DECISION-COLA.md).
+
+### Recursos al terminar
+
+PostgreSQL propio detenido y sin listener en 55434. Docker Desktop cerrado;
+ningún proceso Docker detectado en la comprobación final.
+Consumidores hijos, HTTP, supervisores y pools cerrados; esquemas propios
+eliminados. Se conservan en .local el ZIP verificado, binarios, cluster,
+credenciales y log, y .env privado. No se borran datos para repetir la suite.
+
+Arranque y parada: run db:portable -- up / stop / status, con el prefijo npm.
+La preparación Docker queda como alternativa sin verificar; no usarla a la vez
+ni reemplazar .env privado sin revisar el cambio de entorno.
+
+### Git y publicación manual
+
+HEAD, rama main y origin conservados. Cambios locales sin staging; Codex no
+ejecutó init, add, commit, push, cambios de remoto ni publicación por API.
+La publicación del Encargo 02 queda pendiente de Alex en GitHub Desktop.
+
+Summary:
+
+~~~text
+test: evaluar pg-boss con PostgreSQL real
+~~~
+
+Description:
+
+~~~text
+Añade un experimento aislado de pg-boss con transacciones, reservas,
+recuperación tras muerte de proceso, protección de resultados e HTTP 503/429.
+
+Prepara PostgreSQL 18.7 portátil exclusivo tras el bloqueo de Docker/WSL.
+Verifica tipos, build, instalación reproducible y diez casos distintos,
+con dos ejecuciones de la suite PostgreSQL sin residuos.
+
+Demuestra el límite de retención de trabajos pendientes y deja la adopción
+de pg-boss pendiente de decidir esa política. Actualiza documentación,
+publicación inicial e instrucciones sin implementar la API de producto.
+~~~
+
+Revisión final: 21 archivos publicables, UTF-8 válido, 15 enlaces locales
+existentes y cero coincidencias con las credenciales privadas propias.
+git diff --check correcto para archivos versionados; los ocho nuevos también
+comprobados con diff --no-index --check. Los avisos LF/CRLF son de formato;
+se conservó .gitattributes y no se cambió configuración Git.
+git check-ignore confirmó .env, .local, node_modules, dist y dist-experiment.
+Verificados cero procesos Node/PostgreSQL propios restantes.
+
+Estado final: nueve archivos modificados y ocho nuevos, todos sin staging.
+HEAD 34b953a y origin conservados; no hay resultados remotos del Encargo 02.
+
+---
+
+## Histórico conservado — Encargo 01
+
+Este bloque describe la entrega anterior a la creación del repositorio.
+Sus pendientes de creación/publicación quedaron resueltos por Alex, según
+la comprobación del Encargo 02.
+
 ## Base inicial — 13 de noviembre de 2026
 
 Encargo: inspeccionar entorno, crear base mínima y evaluar la cola sin

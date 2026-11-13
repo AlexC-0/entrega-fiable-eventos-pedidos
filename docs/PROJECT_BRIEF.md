@@ -1,11 +1,15 @@
 # Proyecto 03 — Alcance vigente
 
-El Encargo 05 completa el recorrido local: recepción autenticada, persistencia,
+El Encargo 05 completó el recorrido local: recepción autenticada, persistencia,
 trabajador HTTP y receptor idempotente con preparación ficticia en base separada.
 Se conservan el [contrato HTTP](HTTP.md), la cola propia y seis intentos totales.
 La política, diagnósticos, permisos y demostración están en [ENTREGA](ENTREGA.md).
 Los reenvíos son posibles; este receptor deduplica su efecto transaccionalmente.
 No se promete entrega universal exactamente una vez.
+
+El Encargo 06 añade listado paginado por estado, historial HTTP de intentos,
+[operación](OPERACION.md), [matriz V1](CRITERIOS-V1.md) y [CI](CI.md) preparada.
+No declara cerrada V1: la publicación manual y comprobación remota están pendientes.
 
 ## Objetivo y límites
 
@@ -25,7 +29,7 @@ Una confirmación por pedido en V1.
 - Mismo eventoId con contenido distinto: conflicto.
 - Nuevo eventoId para un pedido ya confirmado: conflicto.
 - Evento y trabajo pendiente en la misma transacción, confirmada antes del HTTP 202.
-- Consulta individual autenticada de estado, contador y fechas; historial por HTTP pendiente.
+- Consulta individual autenticada de estado, contador y fechas; historial HTTP de hasta seis intentos.
 - Credenciales diferentes de recepción, consulta y entrega, en variables de entorno.
 
 Contrato concretado en [HTTP](HTTP.md): JSON UTF-8 hasta 64 KiB, propiedades cerradas,
@@ -35,7 +39,9 @@ UUID canónico minúsculo, fecha UTC real, identificadores ASCII de 1–100 cara
 recepción/consulta. GET individual no expone tokens ni cuerpo completo.
 El núcleo compara el sobre completo mediante jsonb; no importa el orden de claves,
 sí el de líneas. No se eliminan identidades, entregas ni historial por antigüedad.
-Listado, paginación e historial por HTTP quedan fuera de este encargo.
+Listado por clave ascendente (creado_en, evento_id), filtro opcional por estado,
+límite 20 por defecto y 1–100; cursor opaco ligado al filtro y preciso a microsegundos.
+Consultas solo de lectura, sin total ni snapshot global entre páginas.
 
 ## Receptor y confirmación implementados
 
@@ -80,5 +86,6 @@ La decisión, sus motivos y costes están en [DECISION-COLA](DECISION-COLA.md).
 Encargo 04: recepción HTTP autenticada, consulta individual y entorno de desarrollo
 separado con migración explícita.
 Encargo 05: trabajador independiente y receptor idempotente, migración 002 y
-pruebas de recuperación, red y efecto único. Próximo paso recomendado: revisión
-operativa y aceptación del recorrido local, mediante otro encargo.
+pruebas de recuperación, red y efecto único; publicado en f9a427a.
+Encargo 06: consultas, operación y CI preparada. Próximo paso: publicación manual,
+comprobar CI del commit exacto y revisar la matriz antes de aceptar el cierre V1.

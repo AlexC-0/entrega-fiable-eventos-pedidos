@@ -1,3 +1,38 @@
+# Pruebas operativas — Encargo 06
+
+Resultados actuales: **74 casos distintos correctos** (20 núcleo + 22 HTTP +
+21 entrega + 11 operaciones), sin omitidos ni cancelados. [STATUS](../docs/STATUS.md).
+Se conserva el catálogo histórico completo más abajo; sus cifras describen cada encargo.
+
+test:operations exige TEST_DATABASE_URL y TEST_API_DATABASE_URL, PostgreSQL real,
+base entrega_fiable_eventos_pedidos_test y rol API p03_api_prueba.
+db:query-tests prepara ese rol ordinario local sin DDL. Los fixtures propietarios
+le conceden solo los permisos de API sobre su esquema; al eliminarlo desaparecen
+esas concesiones. CI prepara el mismo rol de forma desechable.
+
+| Caso | Evidencia observable |
+| --- | --- |
+| 01 | Autenticación 401/403 previa a validar, ambos endpoints y no-store |
+| 02 | 404, UUID inválido 422, historial vacío y lista explícita de campos sin contenido |
+| 03 | Reservado, recuperación desconocida, reintento 429 y confirmado; orden, fechas, null y ausencia de tokens |
+| 04 | Corte HTTP después de COMMIT remoto: historial de dos intentos y una preparación |
+| 05 | Todos los estados, agotamiento de seis y fallo definitivo; GET no recupera una reserva vencida ni altera filas |
+| 06 | Límites y errores seguros: consultas repetidas/desconocidas, codificación, longitud y estructura del cursor |
+| 07 | 23 filas, empates y microsegundos dentro del mismo milisegundo; páginas de 1/7/20, filtro ligado y sin omisiones |
+| 08 | Inserción y cambio de estado entre páginas; nueva consulta para COMMIT tardío anterior al cursor |
+| 09 | Conexión real del rol API restringido, DDL/UPDATE rechazados, /listo 503 al revocar SELECT de intento |
+| 10 | Actualizar 002 a 003 preserva filas y diagnósticos históricos null; migración repetible e índice existente |
+| 11 | Sin esquemas o conexiones residuales de consultas |
+
+La regresión completa también vuelve a ejecutar los procesos realmente terminados,
+el timeout de cinco segundos y el reinicio real del receptor de test:delivery.
+Operaciones 03/05/08/10 usan estados o datos temporales explícitos del fixture;
+no se presentan como muertes de procesos. El caso 04 sí corta una conexión HTTP real.
+El caso 08 representa un COMMIT tardío mediante inserción con clave anterior;
+no simula una transacción de larga duración. Nunca se limpia desarrollo.
+
+---
+
 # Verificación vigente — Encargo 05
 
 Suites: test:core (20), test:http (22), test:delivery (21): **63 casos distintos**.

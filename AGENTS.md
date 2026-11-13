@@ -10,18 +10,20 @@ Lee README.md, docs/PROJECT_BRIEF.md, docs/DECISION-COLA.md y docs/STATUS.md.
 Redacta principalmente en castellano. No hay sincronización automática con
 ChatGPT navegador.
 
-Los Encargos 01–04 están publicados por Alex. Referencia verificada al iniciar
-el Encargo 05: 522ca4113bcb4a738481a3d117e0490b3950d4bd.
+Los Encargos 01–05 están publicados por Alex. Referencia verificada al iniciar
+el Encargo 06: f9a427adff420d26775cd1dab47f6a09cc7099e2.
 El producto utiliza exclusivamente cola propia PostgreSQL, sin purga y con seis
 intentos como máximo. pg-boss es histórico y no comparte eventos con el producto.
 
-El Encargo 05 autoriza trabajador HTTP independiente y receptor idempotente local,
-diagnósticos de intentos, migraciones explícitas, permisos y pruebas de recorrido.
+El Encargo 06 autoriza listado paginado con filtro por estado, historial de intentos,
+guía operativa, matriz de criterios V1 y preparación de CI con PostgreSQL real.
 Lee también docs/HTTP.md, docs/NUCLEO-COLA.md y docs/ENTREGA.md.
-Conservar contrato de recepción y migración 001 publicada; la 002 añade diagnósticos.
-Usar el catálogo común en migración y disponibilidad, sin cuentas de versiones duplicadas.
-No implementar listado/paginación, historial por HTTP, reintento manual, purga,
-frontend, despliegue ni CI nueva. No avanzar automáticamente al siguiente encargo.
+Conservar recepción, cola propia, trabajador y receptor; migraciones 001/002 publicadas.
+Usar catálogo común y permisos explícitos: API solo añade SELECT de intento.
+El cursor conserva microsegundos y filtro; consultas sin mutaciones ni snapshots globales.
+No implementar reintento manual, purga, frontend, nuevos destinos ni despliegue.
+CI preparada no equivale a ejecución remota. V1 no se declara cerrada.
+No avanzar automáticamente al siguiente encargo.
 
 Un envío simultáneo por trabajador y exactamente una petición por reserva.
 Destino fijo configurado: HTTP en 127.0.0.1, puerto y ruta /eventos; sin destinos
@@ -80,7 +82,7 @@ Instala solo dependencias usadas; comprueba engines/peers; no uses --force ni
 --legacy-peer-deps. No cambies software ni configuración global.
 
 Ante cambios de núcleo: instalación reproducible si cambian dependencias,
-typecheck, build, test:core, test:http y test:delivery con PostgreSQL real. Una base ausente debe fallar,
+typecheck, build, test:core, test:http, test:delivery y test:operations con PostgreSQL real. Una base ausente debe fallar,
 nunca omitir casos. Distingue muerte real de procesos, vencimientos de fixtures
 y pruebas temporales aceleradas. No atribuyas al receptor garantías no comprobadas.
 En documentación revisa contenido, enlaces, cifras y diff --check.
@@ -96,7 +98,9 @@ No instales herramientas globales ni cierres procesos ajenos.
 
 Exige TEST_DATABASE_URL y verifica current_database() =
 entrega_fiable_eventos_pedidos_test antes de escribir o limpiar en pruebas.
-Rol ordinario; esquemas nuevos exclusivos p03_core_ por fixture.
+Rol ordinario; esquemas nuevos exclusivos p03_core_, p03_rec_ o p03_ops_ por fixture.
+TEST_API_DATABASE_URL usa p03_api_prueba sin DDL, preparado explícitamente.
+CI usa contenedor PostgreSQL 18 y credenciales desechables; no requiere Docker local.
 Cierra hijos, temporizadores y pools antes de eliminar solo el esquema creado por
 esa ejecución. Los residuos desconocidos se informan; nunca se borran a ciegas.
 Detén únicamente la instancia propia al finalizar, conservando datos y secretos.

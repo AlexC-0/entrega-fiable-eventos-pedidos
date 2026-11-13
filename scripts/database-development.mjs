@@ -98,9 +98,8 @@ async function migrate() {
     if(existing.rowCount) check(existing.rows[0].propietario==='p03_migracion','Esquema de otro propietario; no se modifica.');
     else await pool.query('CREATE SCHEMA p03_app AUTHORIZATION p03_migracion');
     await applyMigrations(pool,schema);
-    await pool.query('GRANT USAGE ON SCHEMA p03_app TO p03_api');
-    await pool.query('GRANT SELECT ON p03_app.evento,p03_app.entrega,p03_app.migracion TO p03_api');
-    await pool.query('GRANT INSERT ON p03_app.evento,p03_app.entrega TO p03_api');
+    const { grantApiPermissions }=await import('../dist/persistence/api-permissions.js');
+    await grantApiPermissions(pool,schema);
     console.log('Migración aplicada/verificada; API con SELECT/INSERT de recepción y sin DDL.');
   } finally { await pool.end(); }
 }

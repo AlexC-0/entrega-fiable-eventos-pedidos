@@ -1,0 +1,59 @@
+name: Verificación V1
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18.7-bookworm
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: p03_ci_admin_desechable
+          POSTGRES_DB: postgres
+          POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+        ports:
+          - 5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7, referencia oficial verificada
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7, referencia oficial verificada
+        with:
+          node-version: '24.13.0'
+          package-manager-cache: false
+      - name: Instalación reproducible
+        run: |
+          npx --yes --package=npm@11.21.2 npm ci
+          git diff --exit-code -- package-lock.json
+      - name: Preparar exclusivamente el contenedor efímero
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: ${{ job.services.postgres.ports['5432'] }}
+          PGUSER: postgres
+          PGPASSWORD: p03_ci_admin_desechable
+          PGDATABASE: postgres
+        run: psql -X --set=ON_ERROR_STOP=1 --file=scripts/ci-database.sql
+      - name: Tipos y compilación
+        run: |
+          npx --yes --package=npm@11.21.2 npm run typecheck
+          npx --yes --package=npm@11.21.2 npm run build
+      - name: Suites PostgreSQL y HTTP secuenciales con roles ordinarios
+        env:
+          TEST_DATABASE_URL: postgresql://p03_prueba:p03_ci_prueba_desechable@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/entrega_fiable_eventos_pedidos_test
+          TEST_API_DATABASE_URL: postgresql://p03_api_prueba:p03_ci_api_desechable@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/entrega_fiable_eventos_pedidos_test
+        run: |
+          npx --yes --package=npm@11.21.2 npm run test:core
+          npx --yes --package=npm@11.21.2 npm run test:http
+          npx --yes --package=npm@11.21.2 npm run test:delivery
+          npx --yes --package=npm@11.21.2 npm run test:operations

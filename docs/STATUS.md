@@ -1,3 +1,160 @@
+# Estado actual — Encargo 06
+
+13 de noviembre de 2026. Consulta operativa implementada y verificada localmente.
+CI preparada y revisada; pendiente de publicación manual y ejecución remota.
+**V1 no está cerrada.** [Matriz de criterios](CRITERIOS-V1.md).
+
+## Repositorio y continuidad
+
+Ruta: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+Inicio limpio en main...origin/main. HEAD, origin/main y git ls-remote coinciden:
+[f9a427adff420d26775cd1dab47f6a09cc7099e2](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/f9a427adff420d26775cd1dab47f6a09cc7099e2),
+«feat: añadir trabajador HTTP y receptor idempotente».
+Se registra la publicación del Encargo 05 por Alex. No se restauraron commits
+ni se descartaron cambios. Origin sigue siendo el repositorio exclusivo de AlexC-0.
+
+Final: misma rama y HEAD; todos los cambios locales sin staging.
+Codex no hizo staging, commit, push, cambios de remoto, tags, releases o despliegue.
+La primera consulta de Git remota desde el entorno restringido falló por credenciales
+Schannel; la consulta de solo lectura con permiso ampliado confirmó la referencia.
+No se inspeccionaron ni modificaron los proyectos anteriores.
+
+Los resultados siguientes son de este árbol local, no del commit f9a427a ni de CI.
+
+## Cambios y versiones
+
+- GET /eventos/:eventoId/intentos: historial ascendente, hasta seis, campos explícitos,
+  null legítimos, 404 inexistente y 422 UUID inválido. Mantiene resultados persistidos.
+- GET /eventos: filtro opcional por los seis estados, limite 20 por defecto y 1–100,
+  cursor opaco máximo 512 caracteres ligado al filtro; consulta total hasta 2048.
+- Frontera por creado_en y evento_id ascendente, con los seis decimales de PostgreSQL
+  preservados como texto. Sin total ni snapshot global; consultas sin escrituras.
+- Migración 003: índice evento_listado(creado_en, evento_id). 001/002 intactas.
+- EventStore y /listo usan catálogo vigente y comprueban lectura del historial.
+- grantApiPermissions compartido entre db:migrate y fixture del rol API.
+- Nuevo comando events:query y guía de operación, CI y matriz de criterios.
+- Workflow push main/pull_request, PostgreSQL real y cuatro suites secuenciales.
+
+Versiones: Node 24.13.0, npm efectivo 11.21.2 mediante npx, TypeScript 7.0.2,
+Express 5.3.0, pg 8.23.1, PostgreSQL portátil 18.7. Sin nuevas dependencias
+ni cambios de package-lock.json. pg-boss 12.38.2 permanece histórico y no se ejecutó.
+actionlint 1.7.12 se descargó y verificó solo en .local; sin instalación global.
+
+Archivos de implementación: src/http/app.ts y list-query.ts; src/persistence/
+event-store.ts, catalog.ts, list-page.ts, api-permissions.ts y migrations/003-list-index.ts.
+Preparación: scripts/database-development.mjs, database-query-tests.mjs,
+query-events.mjs y ci-database.sql, package.json y .env.example.
+Pruebas: tests/operations/operations.test.ts, tests/tsconfig.json y tests/README.md.
+CI: .github/workflows/ci.yml.
+Documentación: AGENTS, README, PROJECT_BRIEF, HTTP, ENTREGA, OPERACION,
+CRITERIOS-V1, CI y STATUS. El histórico completo anterior de STATUS se conserva debajo.
+
+## Migraciones y permisos
+
+Se aplicó 003 sobre p03_app existente y se repitió db:migrate correctamente.
+El índice sirve al orden por clave; no hay benchmark ni promesa de coste constante
+para el filtro por estado. No se modificaron migraciones publicadas.
+
+p03_api añade únicamente SELECT de intento. Se comprobó por conexión real:
+sin superusuario, CREATEDB/CREATEROLE, CREATE en base/esquema, INSERT de intento
+o UPDATE de entrega. La API compilada y events:query funcionaron con ese rol.
+No se cambiaron permisos del trabajador o receptor.
+
+db:query-tests prepara p03_api_prueba, rol ordinario con CONNECT en la base _test.
+Sus credenciales nuevas están en .local/portable-postgres/query-tests.json y
+TEST_API_DATABASE_URL privada. Los fixtures conceden tablas solo en su esquema;
+no tiene DDL ni permisos sobre negocio de desarrollo. Su preparación es repetible.
+
+Se compararon filas de evento/entrega/intento y preparaciones antes/después de
+migrar y consultar: las dos identidades existentes y sus efectos se conservan.
+Repetir preparadores/migrador mantuvo hashes de .env y archivos privados.
+No se reinicializó el cluster ni se sustituyeron credenciales anteriores.
+
+## Comprobaciones locales reales
+
+Prefijo npm: npx --yes --package=npm@11.21.2 npm.
+
+| Comprobación | Resultado |
+| --- | --- |
+| npm ci | 103 paquetes instalados, 104 auditados, 0 vulnerabilidades informadas; lockfile intacto |
+| run typecheck / run build | Correctos, también tras el ajuste final del error de configuración de pruebas |
+| run test:core | 20/20; 13,527 s |
+| run test:http | 22/22; 12,027 s |
+| run test:delivery | 21/21; 34,457 s |
+| run test:operations, regresión completa | 11/11; 6,938 s |
+| run test:operations, revisión final | 11/11; 6,887 s |
+| node --check de scripts nuevos | Correcto |
+| actionlint 1.7.12 | Código 0 tras corregir claves de puerto en expresiones |
+| Migración 002 → 003 y repetición | Datos/diagnósticos conservados; índice existente y ready correcto |
+| /listo sin SELECT de intento | 503; tras concesión explícita, 200 |
+| API y events:query con p03_api real | Listado de dos páginas, evento e historial correctos; sin alterar datos |
+| TEST_DATABASE_URL / TEST_API_DATABASE_URL ausentes | Código 1 explícito; ninguna omisión |
+| TEST_API_DATABASE_URL inválida | Error seguro sin imprimir el valor recibido |
+| PostgreSQL detenido | Código 1 explícito antes de ejecutar casos, sin omisiones |
+| Revisión final | diff --check correcto; 26 archivos sin staging, 90 enlaces locales válidos, histórico y 001/002/lockfile intactos; sin secretos detectados |
+| Residuos tras suites y comprobaciones | Cero esquemas de fixture y cero conexiones de aplicación |
+| db:portable stop / status | Instancia propia detenida, datos conservados |
+| Procesos y puertos finales | Sin procesos propios ni listeners en 3003/3004/55434 |
+
+**74 casos distintos**, cero fallos/omitidos/cancelados en las suites finales.
+La primera ejecución operativa pasó 11/11 en 7,714 s. Las repeticiones no se suman.
+[Catálogo de pruebas](../tests/README.md). Se corrigieron durante implementación
+un error de edición y un tipo de UUID antes de las ejecuciones correctas.
+Una consulta privada de verificación usó inicialmente el nombre incorrecto de una
+columna del receptor; se corrigió antes de migrar/verificar, sin cambiar datos.
+
+El caso operativo 04 consulta por HTTP los dos intentos del caso de respuesta perdida:
+primer resultado reintentable/conexion con codigoHttp null; segundo confirmado/
+recibo_ya_aplicado con 200. El receptor conserva una preparación y el emisor entregado.
+Las pruebas existentes vuelven a matar realmente trabajadores y reiniciar receptor;
+los fixtures de estados/fechas del listado no se presentan como interrupciones reales.
+
+El recorrido paginado usa 23 filas estables, varias con timestamp idéntico y otras
+separadas por microsegundos dentro de un milisegundo. Páginas de 1, 7 y 20 sin
+omisiones/repeticiones; todos los filtros comprobados. La inserción y cambios entre
+páginas verifican la vista actual y no una instantánea global.
+
+## CI y cierre pendiente
+
+[CI](CI.md) documenta imagen postgres:18.7-bookworm, acciones oficiales verificadas
+y fijadas por SHA, Node/npm, healthcheck, roles ordinarios y SQL efímero.
+Se comprobó configuración con actionlint; no se ejecutó el runner ni su SQL de
+preparación localmente. Sin Docker/WSL, secretos personales o permisos de escritura.
+Sin shellcheck/pyflakes locales: comandos y SQL revisados manualmente.
+
+Pendientes concretos: Alex revisa los cambios y publica manualmente; después se
+comprueba el run remoto del commit exacto y se revisa la matriz para aceptar V1.
+No hay bloqueo de implementación local. CI no se declara verde y V1 no se cierra.
+
+API, receptor, trabajador e instancia PostgreSQL propios detenidos. Se conservan
+dos eventos entregados, dos preparaciones (una por pedido), historial y credenciales.
+Sin purga, reintento manual, frontend, nuevos destinos o despliegue.
+Agotados/fallos definitivos no se reactivan; repetir POST tampoco reinicia presupuesto.
+No se promete entrega universal exactamente una vez. Límites en [OPERACION](OPERACION.md).
+
+## Publicación manual sugerida
+
+Summary:
+
+~~~text
+feat: añadir consultas operativas y preparar CI con PostgreSQL
+~~~
+
+Description:
+
+~~~text
+Añadir listado de eventos por estado con paginación por clave y cursor preciso a microsegundos.
+Exponer historial autenticado de intentos con resultados y diagnósticos persistidos, sin datos internos.
+Incorporar migración 003 y conceder únicamente SELECT de intento al rol API.
+Añadir consulta local segura, guía operativa y matriz de criterios V1 pendientes de cierre.
+Preparar GitHub Actions con PostgreSQL 18.7, roles ordinarios y suites secuenciales.
+Verificar instalación reproducible, tipos, compilación y 74 pruebas locales con PostgreSQL/HTTP reales.
+Revisar workflow con actionlint; dejar su ejecución remota pendiente de publicación manual.
+Conservar datos y credenciales con los procesos propios detenidos.
+~~~
+
+---
+
 # Estado del Proyecto 03
 
 ## Encargo 05 — trabajador HTTP y receptor idempotente completados

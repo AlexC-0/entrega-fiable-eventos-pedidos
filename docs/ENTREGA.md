@@ -122,7 +122,7 @@ de exactamente una vez para servicios externos.
 ## Catálogos, roles y configuración
 
 La migración 001 publicada del emisor no cambia.
-[queueMigrations](../src/persistence/catalog.ts) reúne 001 y 002.
+[queueMigrations](../src/persistence/catalog.ts) reúne 001, 002 y 003 (índice de listado añadido en Encargo 06).
 El migrador y EventStore.ready()/GET /listo usan ese mismo catálogo y sus hashes,
 sin mantener otra cuenta fija de versiones.
 El [catálogo del receptor](../src/receiver/migrations.ts) contiene su propia versión 1.
@@ -130,7 +130,7 @@ El proceso nunca migra al arrancar.
 
 | Rol | Base y permisos |
 | --- | --- |
-| p03_api | Emisor; permisos previos de recepción/consulta sin ampliarlos |
+| p03_api | Emisor; permisos previos de recepción/consulta más SELECT de intento mediante db:migrate (Encargo 06) |
 | p03_migracion | Propietario/migrador del emisor |
 | p03_trabajador | Emisor; SELECT de evento/entrega/intento/migracion, UPDATE de entrega/intento, INSERT de intento |
 | p03_receptor | Base receptor; SELECT de procesado/preparacion/migracion, INSERT de procesado/preparacion |
@@ -172,6 +172,7 @@ Se distingue entre:
 
 No se han probado apagones prolongados, caída del sistema PostgreSQL completo,
 carga, alta disponibilidad, TLS o redes externas. Sin reintento manual, purga,
-listado/paginación, historial por HTTP, frontend, despliegue ni CI nueva.
+frontend, nuevos destinos ni despliegue. El Encargo 06 añade listado/historial
+y CI preparada; ver [HTTP](HTTP.md), [operación](OPERACION.md) y [CI](CI.md).
 [STATUS](STATUS.md) registra resultados y límites; no se atribuyen a un commit
 anterior ni a una ejecución remota de CI.

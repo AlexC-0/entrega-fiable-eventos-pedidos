@@ -1,3 +1,94 @@
+# Consulta operativa — Encargo 06
+
+Se conserva el contrato de recepción y consulta individual descrito más abajo.
+Los dos endpoints nuevos exigen CONSULTA_TOKEN: 401 ausente/desconocido,
+403 token de recepción, autenticación antes de validar, Cache-Control: no-store.
+No recuperan reservas ni cambian estados o contadores.
+
+## Historial
+
+GET /eventos/:eventoId/intentos devuelve eventoId e intentos ordenados por numero
+ascendente, hasta seis y sin paginación. UUID inválido: 422/identificador_invalido;
+inexistente: 404/evento_no_encontrado; existente sin intentos: 200 y lista vacía.
+
+~~~json
+{
+  "eventoId": "d473c6c2-194a-4fb4-a881-41fb18246a26",
+  "intentos": [
+    {
+      "numero": 1,
+      "iniciadoEn": "2026-11-13T10:00:00.000Z",
+      "venceEn": "2026-11-13T10:00:30.000Z",
+      "finalizadoEn": null,
+      "resultado": "reservado",
+      "codigoHttp": null,
+      "categoria": null,
+      "retryAfter": null
+    }
+  ]
+}
+~~~
+
+Fechas UTC; finalizadoEn null mientras no cierre. Resultado persistido:
+reservado, desconocido, reintentable, confirmado o fallido_definitivo.
+codigoHttp solo observado, nunca supuesto. categoria y retryAfter pueden ser null
+en registros históricos/reservados o cuando no corresponden.
+retryAfter es una categoría (ausente, invalido, no_representable, segundos o fecha),
+no la cabecera ni su valor original. Diagnósticos en [ENTREGA](ENTREGA.md).
+No aparecen reserva_token, contenido, credenciales o errores internos.
+
+## Listado
+
+GET /eventos?estado=...&limite=...&cursor=... devuelve
+items y siguienteCursor, null si la petición no encuentra otra página.
+Cada item contiene eventoId, pedidoId, estado, intentos, creadoEn,
+actualizadoEn, proximaEjecucion, reservaHasta y finalizadoEn.
+
+| Parámetro | Contrato |
+| --- | --- |
+| estado | Opcional: pendiente, en_proceso, esperando_reintento, entregado, fallido_definitivo o agotado |
+| limite | Entero decimal canónico 1–100; predeterminado 20. Sin ceros iniciales, signo, espacios o exponentes |
+| cursor | Opaco, base64url canónico sin relleno, máximo 512 caracteres, versión y estructura validadas; conservar exactamente |
+| Consulta completa | Máximo 2048 caracteres; rechaza campos desconocidos, repetidos incluso codificados, valores vacíos, escapes/UTF-8 inválidos |
+
+Consulta inválida: 422/consulta_invalida con mensaje seguro constante.
+El cursor conserva el filtro (incluida su ausencia); otro estado o quitarlo
+produce 422. Se permite cambiar limite. El cursor no es una credencial ni una
+firma de integridad; siempre se exige el token de consulta. No editarlo.
+
+Orden ascendente estable por (evento.creado_en, evento.evento_id). Se pide una
+fila adicional para decidir siguienteCursor, sin contar un total global.
+El timestamp UTC del cursor se obtiene en PostgreSQL como texto con seis decimales
+y se compara como timestamptz. No pasa por Date al construir o aplicar la frontera.
+creadoEn del listado también conserva seis decimales; las otras fechas y la
+consulta individual conservan su serialización ISO a milisegundos.
+
+SQL parametrizado para valores y cursor; los únicos fragmentos condicionales son
+constantes del código. [003](../src/persistence/migrations/003-list-index.ts)
+añade índice B-tree de creado_en/evento_id, para recorrer por clave sin ordenar
+todos los eventos. No se atribuye una mejora de rendimiento medida ni un índice
+especializado por estado: puede recorrer filas que no coincidan con ese filtro.
+
+Cada petición lee el estado actual. No existe snapshot global: una inserción con
+clave posterior puede aparecer y un cambio de estado puede sacar un evento del
+filtro. Un COMMIT tardío con clave anterior al cursor requiere empezar otra consulta
+para localizarlo. Sin búsqueda libre, filtros adicionales ni mecanismo de snapshots.
+
+## Preparación y permisos vigentes
+
+Catálogo del emisor 001/002/003; migraciones publicadas intactas.
+db:migrate aplica/verifica el catálogo y añade solo SELECT de intento a p03_api.
+Se reutiliza el mismo procedimiento de permisos en pruebas con un rol API restringido.
+No se conceden UPDATE de entrega, INSERT/UPDATE de intento, DDL o superusuario.
+/listo exige ahora también leer las columnas necesarias del historial: falta de
+SELECT devuelve 503/persistencia_no_preparada. No concede permisos al arrancar.
+
+Ejemplos seguros y procedimientos: [OPERACION](OPERACION.md).
+La documentación siguiente conserva el contexto de los Encargos 04/05; las
+referencias a una migración o a dos se sustituyen por el catálogo vigente indicado arriba.
+
+---
+
 # Continuidad de la API — Encargo 05
 
 El contrato de recepción/consulta se conserva. /listo valida ahora el catálogo

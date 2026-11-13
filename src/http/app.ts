@@ -1,4 +1,5 @@
 import express from 'express';
+import { parseListQuery } from './list-query.js';
 import type { EventStore } from '../persistence/event-store.js';
 import { authenticate, validateTokens } from './auth.js';
 import type { Tokens } from './auth.js';
@@ -23,6 +24,15 @@ export function createApp(store: EventStore, tokens: Tokens, log: SafeLog = safe
     const consulta = '/eventos/' + event.eventoId;
     res.location(consulta).status(result === 'creado' ? 202 : 200)
       .json({ eventoId: event.eventoId, resultado: result, consulta });
+  });
+  app.get('/eventos', authenticate(tokens,'consulta'), async (req,res) => {
+    res.json(await store.list(parseListQuery(req.originalUrl)));
+  });
+  app.get('/eventos/:eventoId/intentos', authenticate(tokens,'consulta'), async (req,res) => {
+    if (!canonicalUuid(req.params.eventoId)) throw new HttpError(422,'identificador_invalido','Se requiere un UUID canónico en minúsculas.');
+    const history=await store.history(req.params.eventoId);
+    if (!history) throw new HttpError(404,'evento_no_encontrado','El evento no existe.');
+    res.json(history);
   });
   app.get('/eventos/:eventoId', authenticate(tokens,'consulta'), async (req,res) => {
     if (!canonicalUuid(req.params.eventoId)) throw new HttpError(422,'identificador_invalido','Se requiere un UUID canónico en minúsculas.');

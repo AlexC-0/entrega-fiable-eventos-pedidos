@@ -28,7 +28,10 @@
     "worker": "node --env-file-if-exists=.env dist/worker/main.js",
     "receiver": "node --env-file-if-exists=.env dist/receiver/main.js",
     "receiver:inspect": "node --env-file-if-exists=.env scripts/inspect-receiver.mjs",
-    "demo:delivery": "node --env-file-if-exists=.env scripts/demo-delivery.mjs"
+    "demo:delivery": "node --env-file-if-exists=.env scripts/demo-delivery.mjs",
+    "test:operations": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-tests/tests/operations/operations.test.js",
+    "events:query": "node --env-file-if-exists=.env scripts/query-events.mjs",
+    "db:query-tests": "node scripts/database-query-tests.mjs"
   },
   "devDependencies": {
     "@types/express": "5.0.6",

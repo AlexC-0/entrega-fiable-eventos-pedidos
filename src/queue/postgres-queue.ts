@@ -2,6 +2,8 @@ import type { Pool, PoolClient } from 'pg';
 import { schemaName, transaction } from '../persistence/transaction.js';
 import { ConflictoEvento, POLITICA_INICIAL } from './types.js';
 import type { Evento, Politica, Reserva, Resultado } from './types.js';
+import { validateDiagnostics } from './diagnostics.js';
+import type { Diagnostics } from './diagnostics.js';
 import { eventContent, uuid } from './validation.js';
 
 type ReservationRow = {
@@ -70,8 +72,10 @@ export class PostgresQueue {
     });
   }
 
-  async finalizar(reserva: Pick<Reserva, 'eventoId' | 'token' | 'intento'>, resultado: Resultado): Promise<boolean> {
+  async finalizar(reserva: Pick<Reserva, 'eventoId' | 'token' | 'intento'>, resultado: Resultado, diagnostics: Diagnostics = { categoria: 'sin_http' }): Promise<boolean> {
     const { eventoId, token, intento } = reserva;
+    validateDiagnostics(diagnostics);
+    const diagnostic = { ...diagnostics };
     uuid(eventoId); uuid(token);
     if (!Number.isInteger(intento) || intento < 1 || intento > 6) throw new Error('Intento inválido');
     if (!['entregado','fallido_definitivo','reintentar'].includes(resultado.tipo)) throw new Error('Resultado inválido');
@@ -100,7 +104,7 @@ export class PostgresQueue {
         [eventoId, token, intento, tipo, this.policy.baseReintentoMs, minimumIso]);
       if (!changed.rowCount) return false;
       const outcome = tipo === 'entregado' ? 'confirmado' : tipo === 'reintentar' ? 'reintentable' : 'fallido_definitivo';
-      await this.closeAttempt(client, eventoId, intento, outcome);
+      await this.closeAttempt(client, eventoId, intento, outcome, diagnostic);
       return true;
     });
   }
@@ -123,17 +127,18 @@ export class PostgresQueue {
              finalizada_en=CASE WHEN intentos=6 THEN momento.ahora ELSE NULL END,
              reserva_token=NULL,reserva_hasta=NULL,actualizada_en=momento.ahora
            FROM momento WHERE evento_id=$1 RETURNING intentos`, [id, this.policy.baseReintentoMs]);
-        await this.closeAttempt(client, id, changed.rows[0]!.intentos, 'desconocido');
+        await this.closeAttempt(client, id, changed.rows[0]!.intentos, 'desconocido', { categoria: 'reserva_vencida' });
       }
       return expired.rowCount ?? 0;
     });
   }
 
-  private async closeAttempt(client: PoolClient, id: string, number: number, outcome: string): Promise<void> {
+  private async closeAttempt(client: PoolClient, id: string, number: number, outcome: string, diagnostic: Diagnostics): Promise<void> {
     const result = await client.query(
-      `UPDATE ${this.name}.intento i SET resultado=$3, finalizado_en=d.actualizada_en
+      `UPDATE ${this.name}.intento i SET resultado=$3, finalizado_en=d.actualizada_en,
+         codigo_http=$4,categoria=$5,retry_after=$6
        FROM ${this.name}.entrega d WHERE i.evento_id=d.evento_id AND i.evento_id=$1
-         AND i.numero=$2 AND i.resultado='reservado'`, [id, number, outcome]);
+         AND i.numero=$2 AND i.resultado='reservado'`, [id, number, outcome, diagnostic.codigoHttp ?? null, diagnostic.categoria, diagnostic.retryAfter ?? null]);
     if (result.rowCount !== 1) throw new Error('Historial de reserva inconsistente: transición revertida');
   }
 }

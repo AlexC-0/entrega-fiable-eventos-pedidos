@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import pg from 'pg';
 import { ConflictoEvento, POLITICA_INICIAL, PostgresQueue, applyMigrations } from '../../src/index.js';
 import { assertDatabase, connectionOptions, event, requiredUrl, until, withFixture } from './support.js';
+import { queueMigrations } from '../../src/persistence/catalog.js';
 import type { Fixture } from './support.js';
 
 const url = requiredUrl();
@@ -48,7 +49,7 @@ async function crash(f: Fixture, number: number) {
 test('01 migraciones repetibles/concurrentes, versión y evento inmutable', async () => {
   await withFixture(async f => {
     await Promise.all([applyMigrations(f.pool, f.schema), applyMigrations(f.pool, f.schema)]);
-    assert.equal((await f.rows('migracion')).length, 1);
+    assert.equal((await f.rows('migracion')).length, queueMigrations.length);
     await f.queue.registrar(event());
     await assert.rejects(f.pool.query(`UPDATE ${f.name}.evento SET contenido='{}'`), /inmutable/);
     await assert.rejects(f.pool.query(`DELETE FROM ${f.name}.evento`), /inmutable/);

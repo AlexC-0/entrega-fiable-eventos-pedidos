@@ -4,6 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import pg from 'pg';
 import { PostgresQueue, applyMigrations } from '../../src/index.js';
 import type { Evento, Politica } from '../../src/index.js';
+import { queueMigrations } from '../../src/persistence/catalog.js';
 import { schemaName } from '../../src/persistence/transaction.js';
 
 export const DATABASE = 'entrega_fiable_eventos_pedidos_test';
@@ -73,7 +74,7 @@ export async function withFixture(action: (fixture: Fixture) => Promise<void>, p
     created = true;
     await applyMigrations(pool, schema);
     await applyMigrations(pool, schema);
-    assert.equal((await pool.query('SELECT * FROM ' + name + '.migracion')).rowCount, 1);
+    assert.equal((await pool.query('SELECT * FROM ' + name + '.migracion')).rowCount, queueMigrations.length);
     await action(new Fixture(pool, schema, policy));
     assert.deepEqual(errors, []);
   } finally {

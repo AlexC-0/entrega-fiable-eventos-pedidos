@@ -1,3 +1,12 @@
+# Continuidad de la API — Encargo 05
+
+El contrato de recepción/consulta se conserva. /listo valida ahora el catálogo
+vigente de migraciones 001 y 002. El trabajador y receptor independientes están
+implementados según [ENTREGA](ENTREGA.md); los apartados de preparación y límites
+del Encargo 04 que siguen conservan el contexto de esa entrega.
+
+---
+
 # Recepción y consulta HTTP — Encargo 04
 
 La aplicación se crea en [app.ts](../src/http/app.ts); el arranque y cierre están
@@ -96,8 +105,8 @@ UUID inválido: 422; válido inexistente: 404. Autenticación previa a validarlo
 
 **202 significa aceptación persistida**, no entrega al destinatario.
 **Pendiente** significa que existe trabajo guardado y aún no se ha reservado.
-**Entregado** requerirá un envío posterior y confirmación válida del receptor;
-no lo produce este encargo. La pérdida de la respuesta tras COMMIT se resuelve
+**Entregado** exige un envío y confirmación válida del receptor, implementados
+en el [Encargo 05](ENTREGA.md). La pérdida de la respuesta tras COMMIT se resuelve
 repitiendo la misma identidad, no inventando otra confirmación.
 
 ## Salud, disponibilidad y errores

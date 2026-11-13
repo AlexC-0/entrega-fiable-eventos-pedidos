@@ -10,35 +10,48 @@ Lee README.md, docs/PROJECT_BRIEF.md, docs/DECISION-COLA.md y docs/STATUS.md.
 Redacta principalmente en castellano. No hay sincronización automática con
 ChatGPT navegador.
 
-Los Encargos 01, 02 y 03 están publicados por Alex. Referencia verificada al iniciar
-el Encargo 04: 1ef64e872453875811111fda8840bd63193ef5c3.
-El producto utiliza exclusivamente cola propia PostgreSQL, sin purga automática y
-con seis intentos totales como máximo. pg-boss queda como experimento histórico;
-no ejecutar dos mecanismos sobre los mismos eventos ni repetir su evaluación.
+Los Encargos 01–04 están publicados por Alex. Referencia verificada al iniciar
+el Encargo 05: 522ca4113bcb4a738481a3d117e0490b3950d4bd.
+El producto utiliza exclusivamente cola propia PostgreSQL, sin purga y con seis
+intentos como máximo. pg-boss es histórico y no comparte eventos con el producto.
 
-El Encargo 04 abarca recepción HTTP autenticada, consulta individual, salud,
-disponibilidad, configuración, base de desarrollo, migración explícita y pruebas
-reales. Lee también docs/HTTP.md y docs/NUCLEO-COLA.md.
-Conservar intacta la migración 001 publicada y reutilizar registrar().
-Separar aplicación, arranque, validación/autenticación y persistencia.
-No implementar trabajador ni envío externo, receptor de negocio, historial por
-HTTP, listado/paginación, panel, reintento manual, prioridades, múltiples destinos,
-purga, despliegue ni CI nueva. No avanzar al siguiente encargo.
+El Encargo 05 autoriza trabajador HTTP independiente y receptor idempotente local,
+diagnósticos de intentos, migraciones explícitas, permisos y pruebas de recorrido.
+Lee también docs/HTTP.md, docs/NUCLEO-COLA.md y docs/ENTREGA.md.
+Conservar contrato de recepción y migración 001 publicada; la 002 añade diagnósticos.
+Usar el catálogo común en migración y disponibilidad, sin cuentas de versiones duplicadas.
+No implementar listado/paginación, historial por HTTP, reintento manual, purga,
+frontend, despliegue ni CI nueva. No avanzar automáticamente al siguiente encargo.
 
-POST /eventos aplica el contrato cerrado de docs/HTTP.md, máximo 64 KiB,
-JSON UTF-8 sin compresión, sin coerción ni normalización. Autenticar antes del parser.
-Esperar registrar() y su COMMIT antes de responder 202; duplicado 200 y conflicto 409.
-Credenciales Bearer diferentes para recepción y consulta; sin valores predeterminados.
-No registrar tokens, cabeceras Authorization, cuerpos o errores SQL originales.
-Errores JSON seguros y estables; distinguir indisponibilidad 503 de fallo interno 500.
-GET /salud no depende de la base; GET /listo comprueba la persistencia requerida.
-Sin cookies, sesiones ni CORS permisivo. Escuchar únicamente en 127.0.0.1.
+Un envío simultáneo por trabajador y exactamente una petición por reserva.
+Destino fijo configurado: HTTP en 127.0.0.1, puerto y ruta /eventos; sin destinos
+del evento, credenciales en URL, query, fragmento ni redirecciones.
+Timeout total 5 s incluida lectura; cuerpo de respuesta hasta 8 KiB.
+Solo 200 con recibo cerrado del mismo eventoId y aplicado/ya_aplicado confirma.
+Recuperar vencimientos al arrancar y periódicamente; sin bucles solapados o retries ocultos.
+Una excepción de persistencia después del envío conserva incertidumbre y no permite
+reenviar dentro de esa reserva. Cierre acotado, sin nuevas reservas al detener.
+No prometer entrega universal exactamente una vez.
 
-La base de desarrollo entrega_fiable_eventos_pedidos está separada de la de pruebas.
-DATABASE_URL es del rol p03_api, ordinario y sin permisos de creación.
-MIGRATION_DATABASE_URL pertenece al rol p03_migracion y solo sirve al comando
-db:migrate. db:prepare conserva credenciales y crea únicamente recursos propios
-ausentes. La API nunca crea bases, esquemas ni tablas al arrancar.
+Retry-After en 429: segundos no negativos o fecha HTTP válida; segundos referidos
+al reloj PostgreSQL. No recortar una demora válida ni reducir el backoff.
+Guardar únicamente código HTTP observado y categorías seguras. Los diagnósticos
+se confirman junto al estado/intento bajo la misma protección de token/vencimiento.
+Una reserva recuperada queda desconocida sin inventar código HTTP.
+
+Receptor en entrega_fiable_eventos_pedidos_receptor, separado del emisor.
+Identidad/contenido y preparación ficticia se confirman en su propia transacción;
+responder después del COMMIT. Duplicados equivalentes no crean otra preparación.
+Reutilizar validación del contrato; sin endpoints públicos de fallos o control.
+Credenciales RECEPCION_TOKEN, CONSULTA_TOKEN y ENTREGA_TOKEN distintas y privadas.
+No registrar tokens, Authorization, cuerpos completos, errores SQL originales o URLs privadas.
+
+API, trabajador y receptor usan roles ordinarios diferentes, sin DDL.
+No ampliar p03_api para que opere la cola. Migradores y preparadores son explícitos;
+no crear bases/esquemas/tablas al arrancar servicios. Conservar datos y secretos.
+Las pruebas usan esquemas separados de emisor/receptor en la base _test y
+credenciales HTTP efímeras. Distinguir muerte real de procesos, fallos de red
+provocados y estados temporales de fixtures. La demo de desarrollo conserva sus pedidos.
 
 ## Garantías del núcleo
 
@@ -53,8 +66,7 @@ No mantener transacciones abiertas durante operaciones externas.
 
 Política inicial: reserva 30 s; seis intentos incluidos el primero; bases de
 5/10/20/40/80 s más jitter de 0–20 %. Próxima fecha = máximo de backoff y fecha
-mínima recibida. El análisis HTTP de Retry-After y timeout HTTP de 5 s quedan para
-después. Las pruebas pueden reducir tiempos, sin cambiar estados ni presupuesto.
+mínima recibida. El trabajador implementa Retry-After y timeout HTTP total de 5 s. Las pruebas pueden reducir tiempos, sin cambiar estados ni presupuesto.
 Conservar eventos, entregas e historial; ninguna limpieza automática del producto.
 No modificar una migración publicada: añadir una versión posterior.
 
@@ -68,7 +80,7 @@ Instala solo dependencias usadas; comprueba engines/peers; no uses --force ni
 --legacy-peer-deps. No cambies software ni configuración global.
 
 Ante cambios de núcleo: instalación reproducible si cambian dependencias,
-typecheck, build, test:core y test:http con PostgreSQL real. Una base ausente debe fallar,
+typecheck, build, test:core, test:http y test:delivery con PostgreSQL real. Una base ausente debe fallar,
 nunca omitir casos. Distingue muerte real de procesos, vencimientos de fixtures
 y pruebas temporales aceleradas. No atribuyas al receptor garantías no comprobadas.
 En documentación revisa contenido, enlaces, cifras y diff --check.

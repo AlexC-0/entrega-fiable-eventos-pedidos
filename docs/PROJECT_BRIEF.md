@@ -1,15 +1,11 @@
-# Proyecto 03 — Alcance vigente y propuesta futura
+# Proyecto 03 — Alcance vigente
 
-El Encargo 04 implementa recepción HTTP autenticada y consulta individual sobre
-el núcleo PostgreSQL aprobado y publicado en el Encargo 03.
-El [contrato HTTP](HTTP.md) concreta campos, validación, límites, errores y permisos.
-La recepción conserva el sobre completo validado, confirma persistencia antes del
-202 y deja la entrega pendiente. Las consultas devuelven estado, contador y fechas.
-GET /salud y GET /listo distinguen proceso vivo de persistencia disponible.
-
-No se implementa aún trabajador, envío al destinatario ni receptor de negocio.
-La propuesta de envío y deduplicación remota siguiente se conserva para otro encargo.
-Documentarla no autoriza a avanzar automáticamente.
+El Encargo 05 completa el recorrido local: recepción autenticada, persistencia,
+trabajador HTTP y receptor idempotente con preparación ficticia en base separada.
+Se conservan el [contrato HTTP](HTTP.md), la cola propia y seis intentos totales.
+La política, diagnósticos, permisos y demostración están en [ENTREGA](ENTREGA.md).
+Los reenvíos son posibles; este receptor deduplica su efecto transaccionalmente.
+No se promete entrega universal exactamente una vez.
 
 ## Objetivo y límites
 
@@ -41,9 +37,9 @@ El núcleo compara el sobre completo mediante jsonb; no importa el orden de clav
 sí el de líneas. No se eliminan identidades, entregas ni historial por antigüedad.
 Listado, paginación e historial por HTTP quedan fuera de este encargo.
 
-## Receptor y confirmación — propuesta futura
+## Receptor y confirmación implementados
 
-El receptor debe confirmar en una única transacción su registro de deduplicación
+El receptor confirma en una única transacción su registro de deduplicación
 y la preparación ficticia del pedido. Confirma con HTTP 200 y un recibo del mismo
 evento cuyo resultado sea `aplicado` o `ya_aplicado`.
 Los demás resultados no acreditan entrega. La pérdida de una respuesta no demuestra
@@ -58,12 +54,12 @@ un código HTTP ni afirmar que el receptor no aplicó el evento.
 
 Registrar cada intento antes de enviar. Una reserva interrumpida consume
 presupuesto. Máximo de seis intentos, incluido el inicial, y timeout HTTP inicial
-de cinco segundos, aún sin implementar el envío HTTP. Reserva inicial del núcleo: 30 s.
+de cinco segundos, incluida la lectura del recibo. Reserva inicial del núcleo: 30 s.
 Bases aprobadas: 5, 10, 20, 40 y 80 segundos, con jitter entre 0 y 20 %.
 El núcleo acepta una fecha mínima absoluta y toma el máximo con el backoff.
-Analizar Retry-After en HTTP 429 y definir fechas/límites corresponde a otra fase.
+El trabajador analiza Retry-After en 429 como segundos o fecha HTTP, sin recortar esperas válidas.
 
-| Resultado observado | Tratamiento propuesto |
+| Resultado observado | Tratamiento implementado |
 | --- | --- |
 | HTTP 200 con recibo válido del mismo evento | Entregado |
 | Error de conexión, timeout, 408, 429 o 5xx | Reintentar dentro del presupuesto |
@@ -82,5 +78,7 @@ Encargo 01: base y propuesta. Encargo 02: experimento pg-boss publicado, conserv
 como histórico. Encargo 03: migraciones y núcleo propio con pruebas PostgreSQL.
 La decisión, sus motivos y costes están en [DECISION-COLA](DECISION-COLA.md).
 Encargo 04: recepción HTTP autenticada, consulta individual y entorno de desarrollo
-separado con migración explícita. No hay receptor ni trabajador continuo.
-El siguiente encargo será trabajador HTTP y receptor idempotente.
+separado con migración explícita.
+Encargo 05: trabajador independiente y receptor idempotente, migración 002 y
+pruebas de recuperación, red y efecto único. Próximo paso recomendado: revisión
+operativa y aceptación del recorrido local, mediante otro encargo.

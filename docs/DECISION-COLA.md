@@ -1,3 +1,14 @@
+# Continuidad — Encargo 05
+
+El Encargo 04 está publicado en 522ca4113bcb4a738481a3d117e0490b3950d4bd.
+La cola propia se conserva. Se añade trabajador, receptor independiente y
+migración 002 para diagnósticos atómicos; 001 permanece intacta.
+El migrador y /listo comparten catálogo vigente, sin cuenta fija de versiones.
+Detalles actuales en [ENTREGA](ENTREGA.md). El texto siguiente conserva el
+registro histórico de los encargos anteriores.
+
+---
+
 # Continuidad — Encargo 04
 
 El Encargo 03 está publicado en

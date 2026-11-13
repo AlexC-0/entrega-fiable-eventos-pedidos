@@ -4,6 +4,7 @@ import { authenticate, validateTokens } from './auth.js';
 import type { Tokens } from './auth.js';
 import { HttpError, errorHandler, safeLog } from './errors.js';
 import type { SafeLog } from './errors.js';
+import { eventBody } from './body.js';
 import { canonicalUuid, validateEvent } from './validation.js';
 
 export function createApp(store: EventStore, tokens: Tokens, log: SafeLog = safeLog) {
@@ -16,20 +17,7 @@ export function createApp(store: EventStore, tokens: Tokens, log: SafeLog = safe
   app.use((_req,res,next) => { res.set('Cache-Control','no-store'); res.set('X-Content-Type-Options','nosniff'); next(); });
   app.get('/salud', (_req,res) => { res.json({ estado: 'vivo' }); });
   app.get('/listo', async (_req,res) => { await store.ready(); res.json({ estado: 'listo' }); });
-  app.post('/eventos', authenticate(tokens,'recepcion'), (req,_res,next) => {
-    const type = req.get('content-type') ?? '';
-    const encoding = (req.get('content-encoding') ?? 'identity').toLowerCase();
-    if (!/^application\/json(?:\s*;\s*charset\s*=\s*(?:"utf-8"|utf-8))?\s*$/i.test(type) || encoding !== 'identity') {
-      throw new HttpError(415,'formato_no_admitido','Se requiere application/json sin compresión y en UTF-8.');
-    }
-    next();
-  }, express.json({
-    limit: 64 * 1024, inflate: false, strict: false, type: () => true,
-    verify: (_req,_res,buffer) => {
-      try { new TextDecoder('utf-8',{ fatal: true }).decode(buffer); }
-      catch { throw new HttpError(415,'formato_no_admitido','Se requiere application/json sin compresión y en UTF-8.'); }
-    },
-  }), async (req,res) => {
+  app.post('/eventos', authenticate(tokens,'recepcion'), ...eventBody, async (req,res) => {
     const event = validateEvent(req.body);
     const result = await store.queue.registrar(event); // Incluye COMMIT; no responder antes.
     const consulta = '/eventos/' + event.eventoId;

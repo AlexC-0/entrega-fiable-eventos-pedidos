@@ -1,5 +1,225 @@
 # Estado del Proyecto 03
 
+## Encargo 05 — trabajador HTTP y receptor idempotente completados
+
+13 de noviembre de 2026. Recorrido local verificado desde recepción autenticada
+hasta preparación ficticia y entrega confirmada. La cola sigue siendo propia.
+El receptor deduplica su efecto en su propia transacción; no se promete entrega
+universal exactamente una vez.
+
+### Repositorio y publicación anterior
+
+Ruta exclusiva: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+Inicio limpio en main...origin/main. HEAD, origin/main y consulta remota
+git ls-remote origin refs/heads/main coincidían en
+[522ca4113bcb4a738481a3d117e0490b3950d4bd](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/522ca4113bcb4a738481a3d117e0490b3950d4bd),
+«feat: añadir recepción HTTP autenticada y consulta de eventos».
+El Encargo 04 está publicado por Alex. No se restauró ni descartó trabajo posterior.
+
+Origin permanece https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
+Final: main y mismo HEAD; cambios locales sin staging, commit y push pendientes
+de Alex desde GitHub Desktop. No se ejecutó publicación, reescritura, tags,
+releases, despliegue ni CI nueva. No se inspeccionaron proyectos anteriores.
+
+Los resultados siguientes pertenecen a los cambios locales de este encargo,
+no al commit 522ca41 ni a una ejecución remota.
+
+### Cambios y versiones
+
+Sin dependencias añadidas o actualizadas; package-lock.json intacto.
+Node 24.13.0, npm efectivo 11.21.2 mediante npx, TypeScript 7.0.2,
+Express 5.3.0, @types/express 5.0.6, pg 8.23.1 y PostgreSQL portátil 18.7.
+pg-boss 12.38.2 sigue exclusivamente como devDependency histórica.
+No se repitió npm ci porque no cambiaron dependencias ni lockfile.
+
+- src/worker: configuración cerrada, permisos/disponibilidad, HTTP de una sola
+  petición con timeout/lectura acotados, clasificación, Retry-After y bucle secuencial.
+- src/receiver: migración propia, persistencia transaccional, aplicación autenticada
+  y arranque independiente.
+- src/persistence: catálogo común, verificación compartida con /listo y migración
+  002 de diagnósticos. Se conserva la 001 publicada.
+- src/queue: diagnósticos en la misma transición protegida de estado/intento.
+- src/http/body.ts: parser de contrato compartido entre API y receptor.
+- src/server/listen.ts y shutdown.ts: escucha/cierre compartidos, sin arranque al importar.
+- scripts/database-delivery.mjs: preparación y migración explícitas de nuevos recursos.
+- scripts/demo-delivery.mjs e inspect-receiver.mjs: recorrido completo y consulta local.
+- tests/delivery: 21 casos PostgreSQL/HTTP reales, fixtures y procesos hijos.
+- Scripts npm, .env.example, AGENTS, README, PROJECT_BRIEF, HTTP, NUCLEO-COLA,
+  DECISION-COLA, tests/README y docs/ENTREGA.md actualizados.
+- Las pruebas del núcleo adoptan la longitud del catálogo, sin fijar una versión única.
+
+Se conservan scripts/database-portable.mjs, scripts/database-development.mjs,
+scripts/demo.mjs (demostración original), experiments/cola y .gitattributes.
+No se repitió la evaluación histórica de pg-boss.
+
+### Migraciones y recursos preparados
+
+Emisor: entrega_fiable_eventos_pedidos, esquema p03_app.
+Migraciones vigentes 001 y 002, verificadas por el mismo catálogo en migrador
+y EventStore.ready()/GET /listo. 002 añade codigo_http, categoria y retry_after
+a intento; reutiliza las fechas existentes. Datos previos conservados.
+
+Receptor: nueva base entrega_fiable_eventos_pedidos_receptor, esquema p03_receptor,
+catálogo propio versión 1, tablas procesado y preparacion.
+No comparte tablas ni transacción con el emisor.
+Pruebas: entrega_fiable_eventos_pedidos_test, esquemas distintos por participante.
+
+Nuevos roles:
+p03_trabajador, p03_receptor y p03_receptor_migracion.
+El preparador conserva credenciales anteriores y genera las nuevas únicamente
+si faltan, en .local/portable-postgres/delivery.json y .env privados.
+ENTREGA_TOKEN es distinto de recepción/consulta y no se imprime.
+
+Se conectó realmente como API, trabajador y receptor para comprobar:
+sin superusuario, CREATEDB, CREATEROLE o CREATE en base/public/esquema.
+p03_api no obtuvo UPDATE de entrega ni INSERT de intento.
+El trabajador no tiene INSERT de evento; el receptor no tiene UPDATE/DELETE
+de preparación. La demostración funciona con esos roles ordinarios.
+Repetir preparación y migración conservó los hashes de .env y delivery.json.
+No hubo initdb, cambios Docker/WSL ni sustitución de credenciales existentes.
+
+### Garantías implementadas
+
+Una reserva confirmada permite una petición; no hay retries del cliente HTTP.
+Un envío simultáneo por proceso, recuperación al inicio de cada ciclo y espera
+cancelable de 500 ms sin trabajo/error. Dos procesos pueden compartir cola.
+Reserva 30 s; seis intentos totales; bases 5/10/20/40/80 s más jitter 0–20 %.
+
+Solo HTTP 200 y recibo cerrado del mismo eventoId con aplicado/ya_aplicado confirma.
+Timeout total 5 s incluida lectura; máximo 8 KiB de cuerpo; destino fijo loopback,
+sin credenciales/query/fragmento ni redirecciones.
+429 admite segundos y fecha HTTP; referencia relativa PostgreSQL, sin recortar
+demoras válidas. Valores inválidos/no representables usan backoff y categoría segura.
+
+La finalización protege también los diagnósticos con token/número/vencimiento.
+Fallo de persistencia tras respuesta deja incertidumbre sin reenvío inmediato.
+La recuperación marca desconocido/reserva_vencida, sin inventar código HTTP.
+
+El receptor confirma identidad/contenido y preparación ficticia en una sola
+transacción, antes de responder. Conflictos devuelven 409 sin alterar lo previo.
+Se conserva deduplicación tras reiniciar realmente el proceso.
+
+### Comprobaciones reales
+
+Prefijo npm: npx --yes --package=npm@11.21.2 npm.
+
+| Comprobación | Resultado |
+| --- | --- |
+| run typecheck y run build | Correctos, incluida revisión final |
+| node --check de los tres scripts nuevos | Correctos |
+| run test:core | 20/20; cero fallos/omitidos/cancelados; 13,301 s |
+| run test:http | 22/22; cero fallos/omitidos/cancelados; 10,060 s |
+| run test:delivery, revisión final | 21/21; cero fallos/omitidos/cancelados; 32,357 s |
+| Migración desde 001 con evento/intento existentes | Datos conservados; /listo HTTP pasa de 503 a 200 |
+| db:delivery:prepare / migrate repetidos | Correctos; secretos conservados |
+| Roles reales API/trabajador/receptor | Ordinarios, sin DDL ni permisos adicionales indebidos |
+| demo:delivery, evento previamente aceptado | 200 duplicado, entregado, un intento y una preparación |
+| demo:delivery -- --nuevo | 202 creado; después entregado y 200 duplicado; una preparación |
+| receiver:inspect | Una preparación para la identidad original |
+| Entrega sin TEST_DATABASE_URL | Código 1 y error explícito, sin omitir casos |
+| Entrega con PostgreSQL detenido | Código 1 y error explícito, sin omitir casos |
+| Residuos después de las suites | Cero esquemas de fixtures y conexiones de aplicación |
+| db:portable stop / status | Instancia propia detenida; datos conservados |
+| Procesos y puertos al finalizar | Cero procesos propios; sin listeners en 3003/3004/55434 |
+| Revisión final del diff y documentación | diff --check correcto; 43 archivos cambiados, 64 enlaces locales válidos, staging vacío; histórico, 001 y lockfile intactos |
+
+Total **63 casos distintos**: 20 + 22 + 21. No se suman repeticiones o variantes.
+La suite de entrega pasó inicialmente en 29,178 s y tras la regresión en 29,915 s;
+la revisión final incorporó reinicio real del proceso receptor y /listo HTTP
+sobre la actualización de 001. No se consideran pruebas independientes adicionales.
+
+El timeout de 5 s se provocó reteniendo el cuerpo tras enviar cabeceras 200:
+el caso final duró 5,459 s incluyendo fixture y limpieza.
+Se respetaron realmente los Retry-After de segundos y fecha.
+Se probaron 408, 429, 503, otros 4xx, redirecciones, recibos inválidos,
+tipos incorrectos, cuerpos excesivos y respuestas truncadas.
+Se agotaron seis envíos 503 sin un séptimo.
+
+### Evidencia de respuesta perdida e interrupciones
+
+Caso 03, revisión final:
+
+1. El receptor real confirmó procesado y preparacion.
+2. El wrapper del fixture destruyó la conexión antes de enviar el recibo.
+3. El emisor conservó el evento y programó otro intento.
+4. El segundo POST recibió 200/ya_aplicado.
+5. Resultado: **dos POST observados, una preparación, dos intentos persistidos
+   y entrega en entregado**. Categorías locales conexion y recibo_ya_aplicado.
+
+El primer código HTTP quedó ausente: no se observaron cabeceras antes del corte.
+No se atribuye un 200 al intento cuya respuesta se perdió.
+
+Casos 04/05: hijos trabajadores terminados realmente con SIGKILL después de
+reservar y después del efecto remoto antes de finalizar. Recuperación desde
+PostgreSQL, primer intento desconocido/código null y una sola preparación.
+El caso 06 provoca error SQL al finalizar después del efecto; estado e historial
+revierten, y un ciclo inmediato no vuelve a enviar la reserva vigente.
+
+El caso 14 ejecuta dos procesos trabajadores. El 15 cierra un proceso receptor
+e inicia otro sobre el mismo esquema. El 20 comprueba cierre ordenado con intento
+activo sin reservar el siguiente. No existen endpoints públicos de fallos.
+Los vencimientos adelantados de 06/18 y terminales de variantes de 09 son
+fixtures SQL explícitos, no muertes de proceso ni paradas de días.
+[Catálogo detallado](../tests/README.md).
+
+### Demostración y recursos finales
+
+La API, receptor, trabajador y PostgreSQL propios están detenidos.
+Permanecen dos eventos ficticios en estado entregado y dos preparaciones, una por
+pedido. Se conservan identidades, intentos y credenciales; no se borró el evento
+de la demostración anterior. El archivo .local/demo-evento.json sigue siendo el
+original. --nuevo crea otra identidad y otro archivo privado de demo.
+
+La demostración inicia tres procesos reales, los cierra por IPC privado y espera
+su salida correcta. Ctrl+C también solicita cierre en ejecución manual.
+El cierre del CLI está acotado a 20 s; un agotamiento fuerza salida con código 1
+y deja la recuperación al estado persistido. Esa salida de emergencia no se
+presenta como un apagado ordenado probado bajo todas las averías de PostgreSQL.
+
+[README](../README.md) contiene comandos de base, preparación, migración,
+arranque manual, demostración, inspección y parada.
+[ENTREGA](ENTREGA.md) documenta protocolo, Retry-After, diagnósticos y permisos.
+
+Sin bloqueos pendientes para este encargo.
+No se prueban rendimiento, alta disponibilidad, redes externas, TLS o apagones
+prolongados. Sin listado/paginación, historial por HTTP, reintento manual, purga,
+frontend, despliegue ni CI nueva. No se afirma entrega universal exactamente una vez.
+Próximo paso recomendado: revisión operativa y aceptación del recorrido local,
+incluyendo procedimientos ante agotamiento, mediante un nuevo encargo.
+
+### Publicación manual sugerida
+
+Summary:
+
+~~~text
+feat: añadir trabajador HTTP y receptor idempotente
+~~~
+
+Description:
+
+~~~text
+Implementar trabajador independiente con una petición por reserva, timeout total de 5 s y recibos limitados a 8 KiB.
+Clasificar respuestas y Retry-After conservando seis intentos y la política temporal existente.
+Añadir receptor autenticado con deduplicación y preparación ficticia en una transacción propia.
+Incorporar migración 002 y diagnósticos protegidos junto al estado y al historial, sin modificar 001.
+Preparar base y roles separados; ejecutar los procesos ordinarios sin DDL y conservar los permisos de la API.
+Añadir demostración completa, consulta local de preparaciones y cierre acotado de procesos.
+Verificar 20 pruebas de núcleo, 22 HTTP y 21 de entrega con PostgreSQL/HTTP reales.
+Demostrar respuesta perdida: dos envíos, una preparación y entrega confirmada.
+Actualizar documentación y conservar datos y secretos con los recursos detenidos.
+~~~
+
+Staging, commit y push quedan exclusivamente para Alex desde GitHub Desktop.
+
+---
+
+## Histórico del Encargo 04
+
+Se conserva el registro anterior. Las referencias a trabajador futuro, datos
+pendientes, preparación del entorno o publicación por hacer describen aquella entrega.
+
+# Estado del Proyecto 03
+
 ## Encargo 04 — recepción HTTP autenticada y consulta individual completadas
 
 13 de noviembre de 2026. Se implementó la recepción y consulta sobre el núcleo

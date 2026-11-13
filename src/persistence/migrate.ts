@@ -1,12 +1,19 @@
 import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
-import * as initial from './migrations/001-core.js';
+import { queueMigrations } from './catalog.js';
+import type { Migration } from './catalog.js';
 import { schemaName, transaction } from './transaction.js';
+import { PersistenceNotReady } from './errors.js';
 
-// El llamador prepara el esquema. Esta función no crea bases ni inicia servicios.
-export async function applyMigrations(pool: Pool, schema: string): Promise<void> {
+export async function verifyMigrations(pool: Pool, schema: string, migrations = queueMigrations): Promise<void> {
+  const applied = await pool.query<{version:number;sha256:string}>('SELECT version,sha256 FROM '+schemaName(schema)+'.migracion ORDER BY version');
+  if (applied.rowCount !== migrations.length || migrations.some((m,i) =>
+    applied.rows[i]?.version !== m.version || applied.rows[i]?.sha256 !== createHash('sha256').update(m.sql).digest('hex'))) {
+    throw new PersistenceNotReady();
+  }
+}
+export async function applyMigrations(pool: Pool, schema: string, migrations: readonly Migration[] = queueMigrations): Promise<void> {
   const name = schemaName(schema);
-  const migrations = [initial];
   await transaction(pool, async client => {
     await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', ['p03-core-migrations:' + schema]);
     await client.query(`CREATE TABLE IF NOT EXISTS ${name}.migracion (

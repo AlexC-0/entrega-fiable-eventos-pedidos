@@ -1,14 +1,13 @@
-import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
 import { PostgresQueue } from '../queue/postgres-queue.js';
 import { schemaName } from './transaction.js';
-import { sql, version } from './migrations/001-core.js';
+import { verifyMigrations } from './migrate.js';
 import { PersistenceNotReady } from './errors.js';
 
 export class EventStore {
   readonly queue: PostgresQueue;
   private readonly name: string;
-  constructor(private readonly pool: Pool, schema: string, private readonly database: string) {
+  constructor(private readonly pool: Pool, private readonly schema: string, private readonly database: string) {
     this.name = schemaName(schema);
     this.queue = new PostgresQueue(pool,schema);
   }
@@ -27,11 +26,7 @@ export class EventStore {
       throw new PersistenceNotReady();
     }
     try {
-      const ledger = await this.pool.query(`SELECT version,sha256 FROM ${this.name}.migracion ORDER BY version`);
-      if (ledger.rowCount !== 1 || ledger.rows[0]?.version !== version
-        || ledger.rows[0]?.sha256 !== createHash('sha256').update(sql).digest('hex')) {
-        throw new PersistenceNotReady();
-      }
+      await verifyMigrations(this.pool,this.schema);
       await this.pool.query(`SELECT e.evento_id,d.estado,d.intentos FROM ${this.name}.evento e
         JOIN ${this.name}.entrega d USING(evento_id) LIMIT 0`);
       const rights = await this.pool.query(`SELECT

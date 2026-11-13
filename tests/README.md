@@ -1,3 +1,67 @@
+# Verificación vigente — Encargo 05
+
+Suites: test:core (20), test:http (22), test:delivery (21): **63 casos distintos**.
+Sin dependencias añadidas ni repetición del experimento pg-boss.
+Comandos y demostración en [README](../README.md); resultados en [STATUS](../docs/STATUS.md).
+
+## Entrega y receptor
+
+[delivery/delivery.test.ts](delivery/delivery.test.ts) usa PostgreSQL y HTTP reales,
+esquemas propios separados y un runner sin reintentos ni omisiones.
+Exige TEST_DATABASE_URL y comprueba current_database antes de preparar/limpiar.
+No borra desarrollo. Cierra hijos, conexiones, servidores y temporizadores antes
+de eliminar solo los esquemas del fixture.
+
+| Caso | Garantía comprobada |
+| --- | --- |
+| 01 | POST autenticado, pendiente, trabajador, preparación y entregado |
+| 02 | Conexión rechazada y entrega posterior al arrancar receptor en ese puerto |
+| 03 | Corte después del COMMIT remoto: 2 POST, 1 preparación, ya_aplicado, entregado |
+| 04 | SIGKILL real tras reservar, antes de enviar; recuperación persistida |
+| 05 | SIGKILL real tras efecto remoto, antes de finalizar localmente; un solo efecto |
+| 06 | Error SQL al finalizar revierte estado/diagnóstico, sin reenvío inmediato |
+| 07 | Timeout real de 5 s durante lectura del recibo |
+| 08 | 429 con segundos y fecha; esperas reales sin adelantar próxima reserva |
+| 09 | Cabeceras ausentes/inválidas/no representables/pasadas y categorías seguras |
+| 10 | Seis 503, agotado y ningún séptimo envío |
+| 11 | 408 reintentable, otros 4xx definitivos, 3xx sin seguir Location |
+| 12 | Recibos cerrados, tipos, UUID y otros 2xx: sin falsa confirmación |
+| 13 | Respuesta mayor de 8 KiB o truncada: lectura cancelada, sin entrega |
+| 14 | Dos procesos trabajadores concurrentes sin compartir reserva |
+| 15 | Receptor concurrente, conflictos y reinicio real de proceso conservan un efecto |
+| 16 | Fallo diferido de COMMIT del receptor revierte identidad y preparación |
+| 17 | Actualización desde 001 con datos/intento; /listo pasa de 503 a 200 |
+| 18 | Ejecución antigua no sobrescribe diagnósticos posteriores |
+| 19 | Destino local cerrado y credencial de entrega diferente |
+| 20 | Cierre ordenado espera intento activo y evita otra reserva |
+| 21 | Cero esquemas y conexiones residuales; hijos cerrados por los fixtures |
+
+Perfil habitual: reserva 1,5 s, base 20 ms; hijos trabajadores: reserva 1 s y
+timeout 500 ms. Se conservan seis intentos y mismas transiciones.
+El caso 07 usa el timeout real 5 s con reserva inicial 30 s y backoff normal.
+El caso 08 espera segundos/fechas de Retry-After, sin adelantar disponibilidad.
+Los casos 06/18 adelantan vencimiento por SQL de fixture; el 09 prepara terminales
+para aislar variantes. No equivalen a procesos muertos ni a una parada prolongada.
+Los casos 04/05 sí terminan procesos con SIGKILL y esperan su salida.
+El caso 15 termina normalmente un proceso receptor e inicia otro sobre el mismo esquema.
+
+El corte de 03 se inyecta en el wrapper de respuesta del fixture, después de
+ReceiverStore.apply(). Se usa el contrato y la transacción reales del receptor.
+Los puntos de pausa/muerte de 04/05 solo están conectados desde el proceso de pruebas.
+No hay endpoints de fallos ni modos de fallo configurables en el CLI del producto.
+
+Los roles sin DDL se verifican además conectando a los recursos de desarrollo
+y ejecutando demo:delivery con los tres CLI reales. No se atribuye al rol propietario
+de fixtures el mínimo de permisos de los procesos de desarrollo.
+No se han probado cargas, redes externas o tolerancia a apagones prolongados.
+
+---
+
+## Histórico del Encargo 04
+
+Se conserva íntegro el registro anterior. El catálogo de núcleo/API sigue vigente;
+sus referencias a un trabajador futuro corresponden a aquella entrega.
+
 # Verificación vigente — recepción HTTP y núcleo PostgreSQL
 
 El Encargo 04 conserva test:core (20 casos) y añade test:http (22 casos).

@@ -21,7 +21,14 @@
     "db:prepare": "node scripts/database-development.mjs prepare",
     "db:migrate": "node scripts/database-development.mjs migrate",
     "start": "node --env-file-if-exists=.env dist/server/main.js",
-    "demo": "node --env-file-if-exists=.env scripts/demo.mjs"
+    "demo": "node --env-file-if-exists=.env scripts/demo.mjs",
+    "test:delivery": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-tests/tests/delivery/delivery.test.js",
+    "db:delivery:prepare": "node scripts/database-delivery.mjs prepare",
+    "db:delivery:migrate": "node scripts/database-delivery.mjs migrate",
+    "worker": "node --env-file-if-exists=.env dist/worker/main.js",
+    "receiver": "node --env-file-if-exists=.env dist/receiver/main.js",
+    "receiver:inspect": "node --env-file-if-exists=.env scripts/inspect-receiver.mjs",
+    "demo:delivery": "node --env-file-if-exists=.env scripts/demo-delivery.mjs"
   },
   "devDependencies": {
     "@types/express": "5.0.6",

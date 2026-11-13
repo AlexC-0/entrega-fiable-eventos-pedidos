@@ -1,5 +1,175 @@
 # Estado del Proyecto 03
 
+## Encargo 03 — núcleo persistente implementado y verificado
+
+13 de noviembre de 2026. Alex delegó la decisión y autorizó cola mínima propia
+PostgreSQL: conservar eventos, entregas e historial sin purga automática y mantener
+seis intentos totales. pg-boss queda exclusivamente como experimento histórico.
+No se repite su evaluación ni se ejecuta sobre datos del producto.
+
+### Repositorio y publicación anterior
+
+Ruta: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+Rama main; origin: https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
+Inicio limpio: main...origin/main, sin cambios pendientes.
+HEAD y origin/main coincidían con
+[ca1740b0c515354250f54abf7213c91fff5a7b9a](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/ca1740b0c515354250f54abf7213c91fff5a7b9a),
+«test: evaluar pg-boss con PostgreSQL real».
+git ls-remote origin refs/heads/main confirmó ese mismo SHA en este encargo:
+el Encargo 02 ya está publicado por Alex. No se restauró ni reescribió nada.
+
+El cierre local mantiene main y ese HEAD. Cambios del Encargo 03 sin staging;
+commit y push pendientes de Alex desde GitHub Desktop.
+Los resultados siguientes corresponden al árbol local actual, no al commit
+ca1740b ni a CI remota. El histórico inferior conserva el estado de cada entrega.
+
+### Implementación y archivos
+
+- src/persistence: transacciones, migraciones con versión/hash/bloqueo asesor y
+  migración 001 de evento, entrega e intento.
+- src/queue: tipos, validación JSON/identidades y PostgresQueue.
+- src/index.ts: exportaciones del núcleo, sin arranque ni HTTP.
+- tests/core: suite PostgreSQL, fixtures y consumidor hijo para interrupciones reales.
+- tests/tsconfig.json: compilación de las pruebas y el núcleo en dist-tests.
+- package.json/package-lock.json: pg pasa a dependencia de ejecución; test:core
+  y comprobaciones TypeScript ampliadas, sin versiones de paquetes cambiadas.
+- tsconfig.json/.gitignore: tipos Node y exclusión de dist-tests.
+- AGENTS, README, PROJECT_BRIEF, DECISION-COLA, STATUS y tests/README actualizados;
+  docs/NUCLEO-COLA.md documenta operaciones, migraciones, decisiones y límites.
+
+Se conservan sin cambios experiments/cola, scripts de PostgreSQL y Docker,
+compose.experiment.yml, .env.example y .gitattributes.
+No se inspeccionaron ni modificaron proyectos anteriores.
+
+### Decisiones y garantías
+
+Evento y entrega confirman o revierten juntos. UUID y pedidoId únicos resuelven
+duplicados/conflictos incluso con concurrencia; jsonb ignora orden de claves,
+conserva orden de arrays e incluye campos adicionales.
+La reserva confirma contador, token, vencimiento e intento en una transacción.
+FOR UPDATE SKIP LOCKED evita compartir una reserva y permite distribuir otras filas.
+
+Finalizar primero adquiere el bloqueo y después consulta reloj PostgreSQL:
+rechaza token/número antiguos y vencimientos, incluso si venció durante la espera.
+Entrega e historial cambian atómicamente. La recuperación guarda desconocido,
+reprograma con presupuesto o agota la sexta; repetirla no altera terminales.
+
+Política inicial comprobada: reserva 30 s; bases 5/10/20/40/80 s con jitter 0–20 %;
+fecha siguiente = máximo entre backoff y fecha mínima suministrada.
+El timeout HTTP futuro de 5 s y análisis de Retry-After no se implementaron.
+No existe bucle continuo: el futuro trabajador invocará las primitivas persistentes.
+Detalles y costes de mantenimiento en [NUCLEO-COLA](NUCLEO-COLA.md) y
+[DECISION-COLA](DECISION-COLA.md).
+
+### Entorno y comprobaciones reales
+
+Node 24.13.0; npm efectivo 11.21.2 mediante npx (global 11.6.2 conservado);
+TypeScript 7.0.2; pg 8.23.1; @types/pg 8.23.1; @types/node 24.19.2.
+pg-boss 12.38.2 se conserva en devDependencies; peer @opentelemetry/api 1.10.0
+sin dependencia directa artificial. Git 2.56.1.windows.1.
+PostgreSQL portátil 18.7 existente, 127.0.0.1:55434, SCRAM,
+base entrega_fiable_eventos_pedidos_test y rol ordinario p03_prueba.
+
+Prefijo npm utilizado: npx --yes --package=npm@11.21.2 npm.
+
+| Comprobación | Resultado |
+| --- | --- |
+| db:portable up sobre instalación existente | Reutilizada sin initdb ni sustitución de credenciales |
+| install --save-prod --save-exact pg@8.23.1 | Dependencia de ejecución; sin incorporar otra versión o motor |
+| ci | 29 paquetes reinstalados, 30 auditados; cero vulnerabilidades informadas |
+| SHA-256 de package-lock antes/después de ci | Idéntico |
+| ls --depth=0 | Versiones fijadas, sin conflictos informados |
+| run typecheck | Correcto: núcleo, experimento conservado y nuevas pruebas |
+| run build | Correcto: dist, dist-experiment y dist-tests |
+| run test:core, primera ejecución | 20/20; 0 fallos, cancelados u omitidos; 14,068 s |
+| run test:core, segunda ejecución tras ci | 20/20; 0 fallos, cancelados u omitidos; 13,808 s |
+| Control CLI sin TEST_DATABASE_URL | Código 1 y error explícito, sin omitir casos |
+| Control CLI con PostgreSQL detenido | Código 1 y error explícito, sin omitir casos |
+| Revisión de residuos tras las suites | 0 esquemas p03_core_ y 0 conexiones p03_core_ |
+| db:portable stop / status | Instancia propia detenida; datos conservados |
+| git diff --check | Correcto; revisión adicional de espacios/conflictos en los archivos nuevos |
+| Revisión de entrega | 22 archivos cambiados; 32 enlaces locales válidos; UTF-8 correcto |
+| Histórico, secretos y exclusiones | Histórico íntegro; sin coincidencias con secretos locales en archivos publicables; privados/compilados ignorados |
+| Estado final de recursos | 0 procesos PostgreSQL/hijos propios y 0 listeners en 55434 |
+| Estado final Git | main...origin/main; HEAD ca1740b sin cambiar; staging vacío |
+
+Veinte casos distintos, no cuarenta. La segunda ejecución añadió comprobaciones
+explícitas del intervalo de reserva de 30 s y del backoff de recuperación dentro
+de los mismos casos; no cambió el núcleo. Los controles CLI adicionales no se
+cuentan como casos de suite. El catálogo completo está en [tests/README](../tests/README.md).
+
+Reservas de 1,5 s y base 20 ms en el perfil habitual; hijos con reserva de 1 s.
+Los casos 13/14 terminaron hijos reales después del COMMIT de primera/sexta
+reserva, esperaron su salida y recuperaron desde PostgreSQL sin finally.
+El caso 10 esperó realmente un bloqueo hasta vencer. Los otros vencimientos
+se prepararon con fixtures explícitos; no se presentan como muertes de procesos.
+
+El caso 16 comprobó fechas programadas con bases reales y adelantó disponibilidad
+mediante fixture entre reservas, sin esperar los intervalos completos.
+Backoff programado observado, milisegundos:
+
+- Primera ejecución: 5211,676 / 11424,042 / 22804,328 / 45746,440 / 93124,408.
+- Segunda ejecución: 5082,292 / 10918,736 / 23055,883 / 44737,706 / 94959,649.
+
+Son muestras dentro de sus ventanas, no evaluación estadística de jitter.
+El caso 17 esperó realmente una fecha mínima de 300 ms.
+El trabajo de tres años del caso 18 es un fixture; no acredita una parada de años.
+Cada fixture comprobó current_database/rol antes de escribir y limpiar; se cerraron
+pools e hijos antes de borrar únicamente los esquemas creados por esa prueba.
+
+### Recursos, límites y siguiente paso
+
+La instancia propia está detenida. Datos, binarios, credenciales y .env privados
+permanecen en .local y en la raíz según el preparador existente, fuera de Git.
+Sin servidores HTTP ni consumidores permanentes. No se cambió Docker/WSL.
+No se creó un esquema de negocio permanente: solo esquemas de prueba ya limpiados.
+Los comandos reproducibles de arranque, migración mediante fixtures, pruebas y
+parada están en [README](../README.md).
+
+Sin bloqueos pendientes para este encargo. No hay API/autenticación HTTP,
+receptor, trabajador continuo, consultas HTTP, purga, reintento manual, prioridades,
+múltiples destinos ni garantía de orden. No se demuestra idempotencia del efecto
+en el receptor, entrega universal exactamente una vez, carga, alta disponibilidad
+ni tolerancia a saltos arbitrarios del reloj. Los permisos de prueba incluyen DDL
+propio; no equivalen a permisos mínimos de producción.
+No se ejecutó HTTP/navegador: este núcleo no tiene interfaz.
+Sin CI nueva ni resultados remotos, tags, releases o despliegue.
+
+Siguiente encargo: recepción HTTP autenticada sobre este núcleo. No se inicia aquí.
+
+### Publicación manual sugerida
+
+Summary:
+
+~~~text
+feat: implementar núcleo de cola propia en PostgreSQL
+~~~
+
+Description:
+
+~~~text
+Añadir migraciones versionadas para eventos inmutables, entregas e intentos.
+Registrar eventos y reservar trabajo de forma atómica, con deduplicación y conflictos concurrentes.
+Proteger finalizaciones mediante token, número de intento y vencimiento con reloj PostgreSQL.
+Recuperar reservas interrumpidas conservando el historial y un máximo de seis intentos.
+Aplicar backoff de 5/10/20/40/80 s con jitter de 0–20 % y fecha mínima de reintento.
+Mantener pg-boss como experimento histórico y documentar la decisión y sus límites.
+Verificar 20 pruebas con PostgreSQL real en dos ejecuciones, incluida muerte de procesos.
+Comprobar instalación reproducible, tipos y compilación; detener la instancia propia conservando datos.
+~~~
+
+Alex revisará, hará staging, commit y push desde GitHub Desktop.
+
+---
+
+## Histórico del Encargo 02
+
+El registro siguiente conserva resultados y estado de aquella entrega. Las frases
+sobre publicación pendiente, producto sin implementar o decisión sin aprobar
+describen ese momento; quedan actualizadas por el Encargo 03 anterior.
+
+# Estado del Proyecto 03
+
 ## Encargo 02 — evaluación técnica completada, 13 de noviembre de 2026
 
 La evaluación se completó con PostgreSQL real. El producto sigue sin implementar

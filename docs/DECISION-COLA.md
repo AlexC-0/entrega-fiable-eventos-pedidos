@@ -1,3 +1,47 @@
+# Decisión vigente — cola propia PostgreSQL
+
+13 de noviembre de 2026. Alex delegó la decisión técnica y autorizó el
+**Encargo 03: implementar y probar el núcleo persistente de una cola mínima propia**.
+El Encargo 02 está publicado en
+[ca1740b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/ca1740b0c515354250f54abf7213c91fff5a7b9a),
+verificado contra origin/main y consulta remota al iniciar este trabajo.
+
+Se mantiene la conservación sin purga automática de eventos, entregas e historial
+y el presupuesto de seis reservas totales. La evaluación anterior demostró que las
+opciones públicas probadas de pg-boss no conservan indefinidamente todos los
+pendientes con la supervisión normal. Ese resultado no se cambia ni se oculta.
+
+La cola propia permite confirmar evento/entrega e intento/reserva en transacciones
+propias, controlar vencimiento y resultados antiguos, conservar todos los registros
+y aplicar exactamente las bases 5/10/20/40/80 s más jitter 0–20 %.
+No se acepta una retención finita ni la fórmula diferente del experimento.
+
+Se asume mantener migraciones, bloqueos, recuperación, índices, backoff, futuras
+operaciones de supervisión y capacidad de almacenamiento creciente sin purga.
+La biblioteca deja de aportar esa implementación; estos costes no desaparecen por
+haber probado el núcleo. Faltan carga, permisos mínimos permanentes, observabilidad,
+HTTP y deduplicación del efecto en el receptor.
+
+pg-boss 12.38.2 permanece solo como devDependency del experimento reproducible.
+El núcleo importa pg 8.23.1 como dependencia de ejecución. No hay dos mecanismos
+sobre los mismos eventos. No se ejecutó de nuevo la evaluación histórica.
+
+Alcance implementado: [modelo, operaciones y límites](NUCLEO-COLA.md).
+La reserva inicial dura 30 s y se valida con reloj PostgreSQL después de adquirir
+el bloqueo. Los 5 s de timeout HTTP quedan propuestos para el futuro envío.
+El perfil reducido de pruebas conserva estados y seis intentos.
+Sin API, receptor, trabajador continuo, purga, reintento manual, prioridades,
+múltiples destinos, orden garantizado, despliegue ni CI nueva.
+Próximo paso: recepción HTTP autenticada, mediante otro encargo.
+
+---
+
+## Histórico íntegro del Encargo 02
+
+El texto siguiente registra la decisión pendiente al cerrar aquel experimento.
+Sus instrucciones de decidir antes de adoptar quedan resueltas por la decisión
+vigente anterior; sus resultados siguen perteneciendo al Encargo 02.
+
 # Decisión de cola — evaluación del Encargo 02
 
 13 de noviembre de 2026. **pg-boss 12.38.2 evaluado; adopción pendiente.**

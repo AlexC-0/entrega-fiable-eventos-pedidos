@@ -1,3 +1,67 @@
+# Pruebas del núcleo propio — Encargo 03
+
+Código: [tests/core/queue.test.ts](core/queue.test.ts).
+Reproducción desde la raíz con los comandos de [README](../README.md):
+instalación, PostgreSQL portátil existente, typecheck, build y test:core.
+No se ejecuta test:queue como parte de las pruebas del producto.
+
+Veinte casos distintos con PostgreSQL real; un worker del runner, sin skip,
+sin mocks ni reintentos automáticos. Concurrencia explícita dentro de los casos.
+TEST_DATABASE_URL es obligatoria y una conexión ausente falla.
+Antes de crear o limpiar se exige current_database exacta y rol ordinario.
+Cada fixture crea un esquema p03_core_ aleatorio, aplica las migraciones de src
+y cierra sus pools e hijos antes de borrar únicamente ese esquema.
+El caso final detecta residuos; no elimina esquemas de otra ejecución a ciegas.
+
+| Caso | Garantía comprobada |
+| --- | --- |
+| 01 | Migración repetible/concurrente, hash alterado rechazado e inmutabilidad de evento |
+| 02 | Evento y entrega juntos tras COMMIT; error SQL revierte la aceptación entera |
+| 03 | Equivalencia jsonb, orden de arrays y conflictos por identidad/pedido |
+| 04 | Duplicados y conflictos concurrentes: una sola aceptación por identidad/pedido |
+| 05 | Consumidores concurrentes: una reserva por entrega; entregas diferentes pueden reservarse |
+| 06 | Error al registrar intento revierte contador, token y estado de reserva |
+| 07 | Finalización vigente y conservación de terminal ante repetición |
+| 08 | Ejecución antigua rechazada para confirmar, reprogramar y fallar otra reserva |
+| 09 | Vencimiento rechaza resultados incluso antes de ejecutar recuperación |
+| 10 | Finalización bloqueada realmente hasta vencer; se consulta reloj después de esperar |
+| 11 | Dos recuperadores y finalización concurrentes: una recuperación; historial y backoff coherentes |
+| 12 | Finalización vigente frente a recuperación sin vencimiento: entrega confirmada |
+| 13 | Muerte real de hijo tras COMMIT de primera reserva; otra instancia recupera sin finally |
+| 14 | Muerte real en sexta reserva: desconocido, agotado, seis intentos y ninguna séptima reserva |
+| 15 | Error SQL del historial revierte tanto finalización como recuperación |
+| 16 | Reserva de 30 s, cinco bases reales con jitter acotado y agotamiento en sexta |
+| 17 | Fecha mínima futura respetada realmente; una fecha antigua no reduce el backoff |
+| 18 | Fixture de trabajo antiguo conserva disponibilidad, identidad e historial |
+| 19 | Fallo definitivo cierra en primer intento sin reintentar |
+| 20 | Otra base real rechazada antes de escribir; cero esquemas propios residuales |
+
+Perfil habitual: reserva 1,5 s y base de reintento 20 ms; hijos: reserva 1 s.
+Los casos 13 y 14 terminan procesos reales con SIGKILL (terminación forzada en
+Windows), después de comprobar que confirmaron la reserva, y esperan su salida.
+El caso 10 espera el vencimiento real mientras otra transacción bloquea la fila.
+Los casos 08, 09, 11 y 15 preparan vencimientos mediante SQL de fixture.
+El caso 18 inserta fechas antiguas; no se mantiene el sistema apagado durante años.
+
+El caso 16 comprueba fechas de PostgreSQL con política real 30 s y bases
+5/10/20/40/80 s; adelanta disponibilidad entre reservas, por lo que no mide
+esperas reales de esa duración. El caso 17 sí espera una fecha mínima de 300 ms.
+No se demuestra distribución estadística del jitter ni rendimiento.
+
+Resultados exactos de las ejecuciones en [STATUS](../docs/STATUS.md).
+Las repeticiones no multiplican el número de casos distintos.
+No hay HTTP ni efecto de negocio en estos casos; el experimento HTTP histórico
+no acredita que el receptor futuro deduplique sus efectos.
+
+---
+
+## Histórico: pruebas de pg-boss del Encargo 02
+
+Se conserva debajo el registro anterior. Para reproducirlo de forma explícita,
+con build y PostgreSQL preparados: test:guards y test:queue, usando npm 11.21.2.
+No se ha repetido en el Encargo 03. Sus expresiones sobre producto o migraciones
+pendientes describen el estado de aquella evaluación.
+
 # Prueba técnica de cola — Encargo 02
 
 Código: [experiments/cola](../experiments/cola/queue.test.ts).

@@ -10,18 +10,21 @@
   },
   "packageManager": "npm@11.21.2",
   "scripts": {
-    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project experiments/cola/tsconfig.json --noEmit",
-    "build": "tsc --project tsconfig.json && tsc --project experiments/cola/tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project experiments/cola/tsconfig.json --noEmit && tsc --project tests/tsconfig.json --noEmit",
+    "build": "tsc --project tsconfig.json && tsc --project experiments/cola/tsconfig.json && tsc --project tests/tsconfig.json",
     "test:queue": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-experiment/queue.test.js",
     "db:experiment": "node scripts/database-experiment.mjs",
     "test:guards": "node --test dist-experiment/guards.test.js",
-    "db:portable": "node scripts/database-portable.mjs"
+    "db:portable": "node scripts/database-portable.mjs",
+    "test:core": "node --env-file-if-exists=.env --test --test-concurrency=1 --test-timeout=180000 dist-tests/tests/core/queue.test.js"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
     "@types/pg": "8.23.1",
-    "pg": "8.23.1",
     "pg-boss": "12.38.2",
     "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
   }
 }

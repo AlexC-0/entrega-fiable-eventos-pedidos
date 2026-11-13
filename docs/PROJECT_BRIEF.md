@@ -1,8 +1,11 @@
-# Proyecto 03 — Alcance propuesto
+# Proyecto 03 — Alcance vigente y propuesta futura
 
-Estado: **propuesta técnica pendiente de revisión**. Proyecto elegido por Alex:
-«Recepción y entrega fiable de eventos de pedidos». Las reglas detalladas
-siguientes no se presentan como aprobación expresa ni como producto existente.
+El Encargo 03 autoriza y concreta el núcleo de cola propia PostgreSQL, tras la
+decisión delegada por Alex. Persistencia, identidad, estados, seis intentos,
+conservación sin purga y política temporal están implementados y probados según
+[NUCLEO-COLA](NUCLEO-COLA.md) y [STATUS](STATUS.md).
+El resto del contrato HTTP y del receptor sigue siendo propuesta para futuros
+encargos; documentarlo no autoriza implementarlo ahora.
 
 ## Objetivo y límites
 
@@ -25,10 +28,11 @@ Una confirmación por pedido en V1.
 - Consultas autenticadas de eventos, estado e intentos.
 - Credenciales diferentes de recepción, consulta y entrega, en variables de entorno.
 
-Pendiente concretar validaciones, tamaños, equivalencia de contenido (incluido
-orden de líneas y campos desconocidos), respuesta a duplicados, paginación,
-contrato de errores y rutas. La deduplicación de negocio debe sobrevivir a la
-eliminación de registros de cola.
+Pendiente concretar validaciones HTTP, tamaños, respuesta a duplicados, paginación,
+contrato de errores y rutas. El núcleo ya compara contenido con igualdad jsonb:
+ignora orden de claves de objetos, conserva orden de arrays e incluye campos extra.
+La adaptación al contrato HTTP se decidirá expresamente. La identidad se conserva
+junto a la entrega y el historial, sin eliminación por antigüedad.
 
 ## Receptor y confirmación
 
@@ -40,16 +44,17 @@ que el efecto remoto no sucediera; se reenvía la misma identidad para deduplica
 
 ## Estados e intentos
 
-Estados propuestos: `pendiente`, `en_proceso`, `esperando_reintento`,
+Estados implementados en el núcleo: `pendiente`, `en_proceso`, `esperando_reintento`,
 `entregado`, `fallido_definitivo` y `agotado`.
 Los intentos interrumpidos conservan resultado `desconocido`, sin inventar
 un código HTTP ni afirmar que el receptor no aplicó el evento.
 
 Registrar cada intento antes de enviar. Una reserva interrumpida consume
 presupuesto. Máximo de seis intentos, incluido el inicial, y timeout HTTP inicial
-de cinco segundos. Esperas base propuestas: 5, 10, 20, 40 y 80 segundos con jitter.
-Respetar Retry-After válido en 429; la distribución del jitter y el tratamiento
-de fechas/límites de Retry-After requieren definición explícita.
+de cinco segundos, aún sin implementar HTTP. Reserva inicial del núcleo: 30 s.
+Bases aprobadas: 5, 10, 20, 40 y 80 segundos, con jitter entre 0 y 20 %.
+El núcleo acepta una fecha mínima absoluta y toma el máximo con el backoff.
+Analizar Retry-After en HTTP 429 y definir fechas/límites corresponde a otra fase.
 
 | Resultado observado | Tratamiento propuesto |
 | --- | --- |
@@ -64,9 +69,10 @@ trabajador e impedir que ejecuciones antiguas sobrescriban resultados posteriore
 No mantener transacciones abiertas durante la espera HTTP.
 Separar ejecución de cola, reserva de intento y envío HTTP realmente observado.
 
-## Encargo inicial y trabajo posterior
+## Continuidad de encargos
 
-Este encargo solo prepara archivos base, documentación y evaluación de cola.
-No hay recepción, persistencia, autenticación, consultas, receptor ni trabajador.
-La decisión y la prueba técnica futura se delimitan en
-[DECISION-COLA](DECISION-COLA.md); no quedan autorizadas por documentarlas.
+Encargo 01: base y propuesta. Encargo 02: experimento pg-boss publicado, conservado
+como histórico. Encargo 03: migraciones y núcleo propio con pruebas PostgreSQL.
+La decisión, sus motivos y costes están en [DECISION-COLA](DECISION-COLA.md).
+No hay aún recepción HTTP, autenticación, consultas HTTP, receptor ni trabajador
+continuo. El siguiente encargo será recepción HTTP autenticada sobre este núcleo.

@@ -2,31 +2,33 @@
 
 Proyecto 03 de CHAMBA DIARIA: `entrega-fiable-eventos-pedidos`.
 
-**Estado: Encargo 02 evaluado con PostgreSQL real; producto sin implementar.**
-La prueba técnica verifica transacciones, reservas, recuperación, historial y
-Retry-After. La adopción de pg-boss sigue pendiente por el límite de retención
-de trabajos pendientes. No hay API pública, autenticación ni receptor de negocio.
+**Encargo 03: núcleo persistente de cola propia en PostgreSQL implementado.**
+Registra eventos y entregas de forma atómica, reserva trabajo con historial,
+rechaza resultados antiguos y recupera intentos interrumpidos. Se conserva todo
+sin purga por antigüedad y con un máximo de seis reservas por entrega.
+No hay todavía API HTTP, autenticación, trabajador continuo ni receptor de negocio.
 
-Repositorio creado y publicado manualmente por Alex:
+Repositorio publicado manualmente por Alex:
 [AlexC-0/entrega-fiable-eventos-pedidos](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos).
-Rama `main`; HEAD, origin/main y consulta remota coincidían en
-`34b953a31f013462258be9e6be419a4698f831f3` al iniciar este encargo.
-El estado previo sin Git se conserva como histórico en STATUS.
+El Encargo 02 está publicado en
+[ca1740b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/ca1740b0c515354250f54abf7213c91fff5a7b9a).
+Al iniciar este encargo, main estaba limpia y HEAD, origin/main y consulta remota
+coincidían con ese commit. Los cambios actuales quedan sin staging para Alex.
 
-## Entorno utilizado
+## Entorno
 
 Ruta: `C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos`.
 Node 24.13.0, npm 11.21.2 mediante npx, TypeScript 7.0.2,
-pg-boss 12.38.2, pg 8.23.1 y PostgreSQL portátil 18.7.
-Un único paquete raíz privado, lockfile único y ESM/NodeNext estricto.
-El experimento usa node:test y está separado de `src`.
+pg 8.23.1 y PostgreSQL portátil 18.7.
+Un paquete raíz privado, lockfile único, ESM/NodeNext estricto y node:test.
+pg-boss 12.38.2 se conserva como dependencia de desarrollo exclusivamente para
+reproducir el experimento histórico; el producto no lo importa ni lo ejecuta.
 
-Docker fue la primera opción, pero su motor falló con `WSL update required`.
-Alex autorizó continuar sin Docker. Se cerró Docker Desktop normalmente y se
-preparó una instancia portátil exclusiva, sin actualizar WSL, cambiar
-virtualización, instalar servicios Windows ni reutilizar proyectos anteriores.
+Docker fue la primera opción del Encargo 02, pero falló por WSL.
+Alex autorizó PostgreSQL portátil propio. Se reutiliza la instancia existente;
+no se actualiza WSL ni se modifica software global.
 
-## Preparación y reproducción — Windows
+## Preparación y comprobación — Windows
 
 Desde esta carpeta:
 
@@ -35,25 +37,20 @@ npx --yes --package=npm@11.21.2 npm ci
 npx --yes --package=npm@11.21.2 npm run db:portable -- up
 npx --yes --package=npm@11.21.2 npm run typecheck
 npx --yes --package=npm@11.21.2 npm run build
-npx --yes --package=npm@11.21.2 npm run test:guards
-npx --yes --package=npm@11.21.2 npm run test:queue
+npx --yes --package=npm@11.21.2 npm run test:core
 ~~~
 
-`up` descarga PostgreSQL 18.7-1 Windows x64 desde EDB y verifica el SHA-256
-fijado en el script antes de extraer/ejecutar. En una carpeta nueva prepara el
-cluster exclusivo y genera credenciales privadas. Si ya existe, conserva datos,
-roles y contraseñas; un conflicto se rechaza, no se reinicializa.
+`up` conserva el cluster, roles y contraseñas ya existentes. Si no existen,
+el script original descarga PostgreSQL 18.7-1 Windows x64 de EDB y verifica su
+SHA-256 antes de prepararlos. Un conflicto se rechaza, no se reinicializa.
 Escucha solo en `127.0.0.1:55434` con SCRAM.
-La base es `entrega_fiable_eventos_pedidos_test`; `p03_preparacion` prepara
-cluster/base/rol y `p03_prueba` ejecuta las pruebas sin superusuario,
-CREATEDB ni CREATEROLE. Tiene CREATE únicamente en la base de pruebas para
-crear los esquemas efímeros del experimento.
+Base exacta: `entrega_fiable_eventos_pedidos_test`.
+`p03_preparacion` prepara la instancia; `p03_prueba` ejecuta con NOSUPERUSER,
+NOCREATEDB y NOCREATEROLE, y CREATE en esta base para esquemas efímeros propios.
 
 Archivos privados: `.local/portable-postgres/credentials.json`, datos y logs
-dentro de ese directorio, y `.env` con TEST_DATABASE_URL. No compartirlos.
-`.env.example` mantiene variables de producto vacías y explica la variable de
-prueba; no copiarlo sobre el .env generado.
-No hay instalación global ni modificación del PATH.
+bajo ese directorio, y `.env` con TEST_DATABASE_URL. No compartirlos ni copiar
+.env.example sobre el .env generado. No se modifica PATH ni se instala un servicio.
 
 Al terminar, incluso si una comprobación falla:
 
@@ -62,44 +59,46 @@ npx --yes --package=npm@11.21.2 npm run db:portable -- stop
 npx --yes --package=npm@11.21.2 npm run db:portable -- status
 ~~~
 
-`stop` conserva datos y credenciales. No borres .local ni ejecutes initdb
-manualmente sobre la instancia preparada.
+`stop` conserva los datos. No borres .local ni ejecutes initdb sobre la instancia.
+Estos comandos verifican una biblioteca de persistencia: no hay servidor que abrir
+en el navegador ni esquema de negocio permanente preparado por este encargo.
 
-## Qué comprueba el experimento
+## Qué se ha probado
 
-Nueve casos reales y un control de configuración. Dos ejecuciones completas
-sin omisiones; el detalle y sus límites están en [tests/README](tests/README.md)
+Veinte casos con PostgreSQL real: transacciones, duplicados y conflictos concurrentes,
+reservas excluyentes, resultados tardíos, recuperación, muerte real de hijos en
+primera y sexta reservas, backoff, fecha mínima, trabajo antiguo e historial.
+Detalle, perfiles de tiempo y resultados en [tests/README](tests/README.md)
 y [STATUS](docs/STATUS.md).
-Los casos usan esquemas nuevos propios, un consumidor hijo que se termina
-abruptamente y HTTP local efímero. No prueban la futura V1 completa.
-La retención corta del caso F2 provoca un resultado negativo esperado:
-el trabajo pendiente desaparece aunque deleteAfterSeconds sea cero.
 
-La suite exige TEST_DATABASE_URL, consulta current_database antes de escribir
-o limpiar y rechaza otra base o un rol superusuario. Sin PostgreSQL falla.
-Los esquemas propios se eliminan tras cerrar recursos, también ante errores.
-El módulo `src/index.ts` sigue sin comportamiento funcional.
+La suite exige TEST_DATABASE_URL, consulta current_database y comprueba rol ordinario
+antes de preparar o limpiar. Crea esquemas p03_core_ exclusivos y los elimina tras
+cerrar sus recursos. Sin PostgreSQL falla, sin omitir casos.
+Los fixtures antiguos no equivalen a una parada real de años.
+No se ha demostrado todavía la idempotencia del efecto en un receptor.
 
-## Alternativa Docker preparada, no ejecutada
+## Experimento histórico y alternativa Docker
 
-`compose.experiment.yml` fija `postgres:18.7-bookworm`, nombre y volumen
-exclusivos y puerto loopback. `npm run db:experiment -- up|stop|status` prepara
-o administra solo esos recursos, mediante el contexto desktop-linux.
-La imagen no se descargó ni el contenedor se creó en esta evaluación:
-no se atribuyen los resultados al contenedor. Su preparación sigue sin verificar.
+El Encargo 02 evaluó pg-boss y demostró el límite de retención de pendientes.
+Se preservan código y resultados en experiments/cola y en la
+[decisión de cola](docs/DECISION-COLA.md). No se repite esa evaluación ni forma
+parte de test:core. Reproducción histórica explícita: después de build,
+`npm run test:guards` y `npm run test:queue`, usando el npm fijado arriba.
+Sus datos aislados nunca se comparten con los eventos del producto.
 
-No ejecutar ambos entornos en el puerto 55434. La presencia de .env con otras
-credenciales provoca rechazo. Cualquier cambio de entorno exige revisar esa
-configuración privada, sin borrar datos ni sustituir contraseñas a ciegas.
+compose.experiment.yml y scripts/database-experiment.mjs siguen como alternativa
+Docker preparada, sin verificar ni ejecutar en este encargo. No ejecutar ambos
+entornos sobre el puerto 55434 ni sustituir credenciales para cambiar de entorno.
 
-## Documentación y publicación
+## Documentación y siguiente paso
 
-- [Alcance funcional propuesto](docs/PROJECT_BRIEF.md).
-- [Evaluación y decisión de cola pendiente](docs/DECISION-COLA.md).
+- [Alcance vigente y propuesta HTTP futura](docs/PROJECT_BRIEF.md).
+- [Decisión de cola propia e histórico](docs/DECISION-COLA.md).
+- [Operaciones, migraciones y garantías del núcleo](docs/NUCLEO-COLA.md).
 - [Resultados y estado](docs/STATUS.md).
 - [Instrucciones para Codex](AGENTS.md).
 
-Se conserva .gitattributes creado por GitHub Desktop. node_modules, dist,
-dist-experiment, .env y .local quedan fuera de Git.
-Los cambios del Encargo 02 se dejan sin staging; Alex realiza el commit y el push
-desde GitHub Desktop. No hay CI nueva, tags, releases ni despliegue.
+Siguiente encargo: recepción HTTP autenticada sobre este núcleo.
+No se inicia automáticamente. Se conserva .gitattributes; node_modules, dist,
+dist-experiment, dist-tests, .env y .local quedan fuera de Git.
+Alex realiza commit y push desde GitHub Desktop. Sin CI nueva, tags ni despliegue.

@@ -1,3 +1,116 @@
+# Estado actual — Encargo 07: cierre documental de V1
+
+13 de noviembre de 2026. **V1 técnicamente completada dentro del alcance acordado**
+sobre [5dc65b41ba612493a3a96252f7718ad2a7d5bf3b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y
+[CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
+La revisión acotada no identificó discrepancia material que invalide la matriz.
+[Ficha de cierre](FICHA-V1.md), [criterios](CRITERIOS-V1.md) y [CI](CI.md).
+
+## Punto de partida y estado Git
+
+Ruta y raíz comprobadas: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+Rama main, inicio limpio (main...origin/main); HEAD, origin/main y consulta
+git ls-remote origin refs/heads/main coinciden en 5dc65b41ba612493a3a96252f7718ad2a7d5bf3b.
+Origin: https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
+El Encargo 06 está publicado por Alex. Sin restauraciones ni descarte de trabajo posterior.
+
+Final comprobado para revisión: misma rama/HEAD y nueve documentos modificados,
+sin staging. Alex realiza commit y push desde GitHub Desktop.
+No se ejecutaron publicaciones, cambios de remoto, tags, releases o despliegue.
+
+## Fuentes de evidencia y comprobación propia
+
+1. Alex facilitó en el encargo el run, SHA y resultado success, junto al desglose
+   local 20/22/21/11 del STATUS anterior.
+2. Codex consultó en este encargo los metadatos públicos del run: head_sha exacto,
+   push a main, intento 1, completed/success. También consultó el job verificar
+   131887043716, sus pasos y los resúmenes de logs mediante el conector GitHub.
+3. Esos registros confirman instalación reproducible, preparación del contenedor,
+   tipos, compilación y cuatro suites secuenciales correctas con PostgreSQL real.
+   Se contrastó el workflow publicado, sin modificarlo ni volver a ejecutarlo.
+
+| Suite | Local histórico del Encargo 06 | CI del run consultado |
+| --- | --- | --- |
+| Núcleo | 20/20 | 20/20 |
+| HTTP | 22/22 | 22/22 |
+| Entrega | 21/21 | 21/21 |
+| Operaciones | 11/11 | 11/11 |
+| Total de casos distintos | 74 | 74 |
+
+Cero fallos, omitidos o cancelados en esos resultados. No se suman ambas
+ejecuciones como 148 casos distintos. No se atribuye esta CI a futuros commits.
+La revisión de código/pruebas confirma correspondencia con persistencia antes
+de aceptar, autenticación, deduplicación, recuperación, presupuesto, respuesta
+perdida, consultas, permisos y secretos de la matriz; no es una auditoría completa.
+
+## Documentación y límites
+
+Actualizados README, AGENTS, PROJECT_BRIEF, CRITERIOS-V1, CI, OPERACION y
+referencia vigente de ENTREGA; añadida FICHA-V1 y este registro en STATUS.
+La ficha enlaza el experimento histórico de pg-boss, la decisión de cola propia,
+comandos existentes de demo, evidencias y límites. Aclara la contribución de Alex
+y la asistencia de Codex, con borrador para portfolio/CV y puntos de entrevista.
+No atribuye experiencia profesional, usuarios, rendimiento o dominio individual.
+No se publicaron ni modificaron CV, LinkedIn o portfolio.
+
+Se conserva el histórico completo de STATUS debajo; sus pendientes y resultados
+describen el momento de cada encargo. Las referencias actuales se actualizaron.
+Se conservan sin cambios los históricos de evaluación y catálogos de pruebas.
+
+Garantía acotada: los envíos pueden repetirse; el receptor evita duplicar su
+preparación mediante identidad persistida y transacción propia. Sin promesa
+universal exactamente una vez. Continúan los límites locales: datos ficticios,
+loopback, sin carga/alta disponibilidad/redes externas/TLS o apagones prolongados
+probados, sin auditoría exhaustiva. Sin frontend, despliegue, purga ni reintento manual.
+
+## Validación de este encargo
+
+Comprobaciones realizadas: estado Git y remoto, lectura de documentos, contraste
+selectivo con implementación/casos y workflow, consulta remota del run/job/logs,
+revisión de cifras, enlaces locales, diff y git diff --check.
+Resultado: nueve archivos Markdown, 109 enlaces locales válidos, cifras 20/22/21/11
+contrastadas con casos declarados y logs, histórico de STATUS íntegro y staging vacío.
+git diff --check correcto. Código, pruebas, dependencias, lockfile, configuración,
+migraciones y workflow permanecen intactos.
+
+No se ejecutaron npm ci, typecheck, build, suites, demo ni migraciones.
+No se arrancó PostgreSQL ni ningún servidor; no se tocaron bases, datos o
+credenciales. La parada y las dos preparaciones del cierre anterior son datos
+históricos, no un recuento nuevo de la base en este encargo.
+Ningún recurso de aplicación fue creado o arrancado por este trabajo.
+
+## Publicación y siguiente paso
+
+Pendiente: revisión de Alex, staging/commit/push manuales y comprobación del
+nuevo SHA y de su estado remoto. El cierre técnico se fundamenta en 5dc65b4;
+el futuro commit documental requiere su propia comprobación.
+Después, la investigación y selección del siguiente proyecto se realizará en
+ChatGPT conforme a CHAMBA DIARIA; no se inicia aquí.
+
+Summary:
+
+~~~text
+docs: cerrar V1 y consolidar evidencias verificables
+~~~
+
+Description:
+
+~~~text
+Registrar V1 técnicamente completada dentro del alcance local sobre 5dc65b4 y CI 43425880532 success.
+Contrastar matriz, implementación y pruebas existentes, distinguiendo 74 resultados locales históricos y 74 remotos.
+Actualizar estado, alcance e instrucciones y conservar los registros históricos.
+Añadir ficha de cierre con arquitectura, decisión de cola, demo, límites y material reutilizable con atribución precisa de Alex y Codex.
+Revisar coherencia, enlaces, cifras y diff sin cambiar código ni ejecutar suites o servicios.
+Dejar la publicación documental y comprobación del nuevo commit pendientes de Alex.
+~~~
+
+---
+
+## Histórico íntegro anterior al Encargo 07
+
+Los apartados siguientes conservan sus títulos, cifras y pendientes originales;
+no describen el estado vigente del cierre.
+
 # Estado actual — Encargo 06
 
 13 de noviembre de 2026. Consulta operativa implementada y verificada localmente.

@@ -10,20 +10,38 @@ Lee README.md, docs/PROJECT_BRIEF.md, docs/DECISION-COLA.md y docs/STATUS.md.
 Redacta principalmente en castellano. No hay sincronización automática con
 ChatGPT navegador.
 
-Los Encargos 01–05 están publicados por Alex. Referencia verificada al iniciar
-el Encargo 06: f9a427adff420d26775cd1dab47f6a09cc7099e2.
-El producto utiliza exclusivamente cola propia PostgreSQL, sin purga y con seis
-intentos como máximo. pg-boss es histórico y no comparte eventos con el producto.
+Los Encargos 01–06 están publicados por Alex.
+V1 técnicamente completada dentro del alcance funcional y de ejecución local
+acordado sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
+74 pruebas: 20 núcleo, 22 HTTP, 21 entrega y 11 operaciones. La evidencia remota
+fue aportada por Alex y contrastada por Codex mediante metadatos, job y logs.
+No atribuir esa ejecución a commits posteriores.
 
-El Encargo 06 autoriza listado paginado con filtro por estado, historial de intentos,
-guía operativa, matriz de criterios V1 y preparación de CI con PostgreSQL real.
-Lee también docs/HTTP.md, docs/NUCLEO-COLA.md y docs/ENTREGA.md.
-Conservar recepción, cola propia, trabajador y receptor; migraciones 001/002 publicadas.
-Usar catálogo común y permisos explícitos: API solo añade SELECT de intento.
-El cursor conserva microsegundos y filtro; consultas sin mutaciones ni snapshots globales.
-No implementar reintento manual, purga, frontend, nuevos destinos ni despliegue.
-CI preparada no equivale a ejecución remota. V1 no se declara cerrada.
-No avanzar automáticamente al siguiente encargo.
+El Encargo 07 es exclusivamente documental: consolidar cierre y evidencias,
+actualizar referencias y preparar una ficha reutilizable dentro del repositorio.
+Leer también docs/CRITERIOS-V1.md, docs/CI.md, docs/OPERACION.md y docs/FICHA-V1.md.
+No cambiar código, pruebas, dependencias, lockfile, migraciones, CI, configuración
+ni datos. No arrancar PostgreSQL o servidores ni repetir suites para este cierre.
+Las garantías técnicas siguientes se conservan para futuros encargos explícitos;
+no amplían el alcance documental actual.
+Mantener históricos como históricos, distinguir resultados facilitados y
+comprobaciones propias, y revisar coherencia, enlaces, cifras y diff --check.
+Los cambios documentales quedan pendientes del commit y push manuales de Alex
+y de comprobar el nuevo commit, sin trasladarle la CI anterior.
+
+La cola propia PostgreSQL mantiene seis intentos, conservación sin purga y
+deduplicación transaccional en el receptor. pg-boss sigue solo como histórico.
+Sin carga/alta disponibilidad/redes externas comprobadas, frontend, despliegue,
+purga ni reintento manual. No modificar ni publicar CV, LinkedIn o portfolio.
+La ficha queda en el repositorio para revisión y publicación manual de Alex.
+Siguiente paso: Alex publica el cierre y se comprueba su estado remoto.
+La investigación y selección del siguiente proyecto será después en ChatGPT,
+conforme a CHAMBA DIARIA. No iniciarla ni avanzar automáticamente.
+
+Conservar contrato de recepción, migraciones publicadas 001/002/003 y catálogo
+compartido con /listo. API solo con sus permisos de recepción y lectura de intentos;
+sin permisos de trabajador. El cursor conserva microsegundos y filtro; consultas
+sin mutaciones ni snapshot global.
 
 Un envío simultáneo por trabajador y exactamente una petición por reserva.
 Destino fijo configurado: HTTP en 127.0.0.1, puerto y ruta /eventos; sin destinos

@@ -1,4 +1,25 @@
-# CI preparada — pendiente de ejecución remota
+# CI verificada — V1
+
+Ejecución [43425880532](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532), intento 1, push a main:
+completed / success sobre [5dc65b41ba612493a3a96252f7718ad2a7d5bf3b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b).
+Alex facilitó esta evidencia desde ChatGPT. En el Encargo 07 Codex contrastó
+los metadatos públicos del run, el job verificar (131887043716), sus pasos y los
+resúmenes de logs; no lanzó ni repitió CI.
+
+| Suite | Resultado remoto leído |
+| --- | --- |
+| test:core | 20/20 |
+| test:http | 22/22 |
+| test:delivery | 21/21 |
+| test:operations | 11/11 |
+
+74 casos, cero fallos, cancelados u omitidos. Instalación reproducible, preparación
+del contenedor, tipos y compilación también concluyeron success.
+Los 74 resultados locales anteriores se documentan por separado en [STATUS](STATUS.md).
+La evidencia pertenece a ese SHA; tras la publicación manual de este cierre habrá
+que comprobar el nuevo commit. No se considera cubierto por este run.
+
+## Configuración publicada
 
 [Workflow](../.github/workflows/ci.yml) para push a main y pull_request.
 Ubuntu 24.04, Node 24.13.0 y npm 11.21.2 explícito mediante npx, igual que local.
@@ -28,7 +49,7 @@ No se necesitan .env, .local, PostgreSQL portátil Windows ni credenciales de de
 La ausencia de TEST_DATABASE_URL, TEST_API_DATABASE_URL o PostgreSQL provoca fallo.
 Las suites verifican current_database antes de escribir o limpiar.
 
-## Pasos y revisión
+## Pasos y revisión histórica del Encargo 06
 
 npm ci y git diff --exit-code -- package-lock.json; typecheck; build; test:core,
 test:http, test:delivery y test:operations, secuencialmente. Sin skip,
@@ -56,7 +77,8 @@ Sin instalación global. No hay shellcheck/pyflakes locales; se desactivaron esa
 integraciones y se revisaron manualmente los comandos y SQL. actionlint final: código 0.
 La primera revisión detectó índices numéricos en ports; se corrigieron a claves de texto.
 
-**Preparada y revisada, no ejecutada remotamente.** No se instaló ni reparó Docker/WSL.
-El SQL del contenedor se revisó, no se ejecutó contra la base de desarrollo.
-Tras el commit y push manuales de Alex, comprobar el run y el SHA exacto antes de
-atribuir resultados a CI o plantear el cierre de V1.
+Al entregar el Encargo 06 estaba preparada y revisada, todavía sin ejecución remota.
+Esa situación histórica quedó resuelta con el run enlazado al inicio.
+No se instaló ni reparó Docker/WSL ni se ejecutó el SQL de CI contra desarrollo.
+En el Encargo 07 solo se revisan documentos y evidencias existentes; la configuración
+publicada permanece intacta.

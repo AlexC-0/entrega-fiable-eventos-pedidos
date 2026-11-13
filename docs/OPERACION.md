@@ -86,4 +86,5 @@ ni reiniciar contadores. V1 no incluye reintento manual o reconciliación que ca
 terminales. Cualquier decisión de ese tipo requiere un encargo posterior.
 
 Las consultas no garantizan disponibilidad futura ni orden de entrega. No hay
-frontend, panel, purga o nuevos destinos. El cierre V1 sigue pendiente.
+frontend, panel, purga o nuevos destinos. V1 está técnicamente completada dentro
+de este alcance; evidencia y límites en la [ficha de cierre](FICHA-V1.md).

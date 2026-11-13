@@ -173,6 +173,7 @@ Se distingue entre:
 No se han probado apagones prolongados, caída del sistema PostgreSQL completo,
 carga, alta disponibilidad, TLS o redes externas. Sin reintento manual, purga,
 frontend, nuevos destinos ni despliegue. El Encargo 06 añade listado/historial
-y CI preparada; ver [HTTP](HTTP.md), [operación](OPERACION.md) y [CI](CI.md).
-[STATUS](STATUS.md) registra resultados y límites; no se atribuyen a un commit
-anterior ni a una ejecución remota de CI.
+y CI, cuya ejecución 43425880532 terminó con success sobre 5dc65b4;
+ver [HTTP](HTTP.md), [operación](OPERACION.md) y [CI](CI.md).
+[STATUS](STATUS.md) diferencia resultados locales históricos, evidencia remota
+y comprobaciones documentales del Encargo 07. No se atribuyen a futuros commits.

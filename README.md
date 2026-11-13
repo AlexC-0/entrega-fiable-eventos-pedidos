@@ -2,16 +2,20 @@
 
 Proyecto 03 de CHAMBA DIARIA: `entrega-fiable-eventos-pedidos`.
 
-**Encargo 06: consulta operativa implementada y CI preparada. V1 pendiente de cierre.**
+**V1 técnicamente completada dentro del alcance local acordado. Encargo 07: cierre documental.**
 API autenticada → evento persistido → trabajador HTTP → receptor idempotente →
 preparación ficticia → entrega confirmada. Los reenvíos pueden repetirse;
 la preparación de este receptor se deduplica dentro de su propia transacción.
 
 Repositorio de [AlexC-0](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos).
-Encargo 05 publicado en
-[f9a427a](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/f9a427adff420d26775cd1dab47f6a09cc7099e2).
-Inicio limpio en main, HEAD/origin/main/remoto coincidentes.
-Los cambios actuales quedan sin staging para el commit y push manuales de Alex.
+Encargo 06 publicado en [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
+Evidencia facilitada por Alex y contrastada en este cierre con GitHub:
+instalación reproducible, tipos, compilación y cuatro suites correctas.
+Los cambios documentales del Encargo 07 quedan sin staging para el commit y push
+manuales de Alex y la comprobación posterior de ese nuevo commit.
+
+[Ficha de cierre y evidencias del proyecto](docs/FICHA-V1.md): alcance,
+arquitectura, decisión de cola, demo, límites y descripción reutilizable.
 
 ## Preparación en PowerShell
 
@@ -146,11 +150,11 @@ No se ejecuta sobre eventos del producto.
 - [Trabajador, receptor y garantías](docs/ENTREGA.md).
 - [Instrucciones para Codex](AGENTS.md).
 
-[CI](docs/CI.md) preparada para push a main y pull requests: PostgreSQL 18.7,
-Node 24 y las cuatro suites secuenciales con roles ordinarios. Revisada con
-actionlint; ejecución remota pendiente del commit y push manuales de Alex.
+[CI](docs/CI.md) ejecutada con éxito sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
+La [matriz de criterios](docs/CRITERIOS-V1.md) respalda el cierre técnico: 74 pruebas
+locales históricas y 74 en esa ejecución remota, con fuentes diferenciadas.
+Este encargo no repitió suites ni ejecutó la demostración.
 
-[Matriz de criterios V1](docs/CRITERIOS-V1.md): 74 pruebas locales correctas.
-V1 aún no está cerrada. Faltan comprobar CI sobre el commit publicado y revisar
-criterios/límites con Alex. Sin reintento manual, purga, frontend, nuevos destinos
-ni despliegue. No se promete entrega universal exactamente una vez.
+Sin reintento manual, purga, frontend, nuevos destinos ni despliegue.
+No se promete entrega universal exactamente una vez. Pendiente únicamente publicar
+este cierre documental y comprobar su nuevo commit; el run anterior conserva su SHA.

@@ -7,9 +7,12 @@ La política, diagnósticos, permisos y demostración están en [ENTREGA](ENTREG
 Los reenvíos son posibles; este receptor deduplica su efecto transaccionalmente.
 No se promete entrega universal exactamente una vez.
 
-El Encargo 06 añade listado paginado por estado, historial HTTP de intentos,
-[operación](OPERACION.md), [matriz V1](CRITERIOS-V1.md) y [CI](CI.md) preparada.
-No declara cerrada V1: la publicación manual y comprobación remota están pendientes.
+El Encargo 06 incorporó listado paginado por estado, historial HTTP de intentos,
+[operación](OPERACION.md), [matriz V1](CRITERIOS-V1.md) y [CI](CI.md).
+El Encargo 07 registra V1 técnicamente completada sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
+Las pruebas y límites se consolidan en la [ficha de cierre](FICHA-V1.md).
+El cierre documental queda pendiente de publicación manual y comprobación de su
+nuevo commit; no se atribuye a ese futuro commit la ejecución anterior.
 
 ## Objetivo y límites
 
@@ -87,5 +90,7 @@ Encargo 04: recepción HTTP autenticada, consulta individual y entorno de desarr
 separado con migración explícita.
 Encargo 05: trabajador independiente y receptor idempotente, migración 002 y
 pruebas de recuperación, red y efecto único; publicado en f9a427a.
-Encargo 06: consultas, operación y CI preparada. Próximo paso: publicación manual,
-comprobar CI del commit exacto y revisar la matriz antes de aceptar el cierre V1.
+Encargo 06: consultas, operación y CI; publicado en 5dc65b4, con run 43425880532 success.
+Encargo 07: cierre técnico documentado y evidencias, sin ampliar el producto.
+Siguiente paso: Alex publica este cierre y se comprueba el estado remoto.
+El siguiente proyecto se investigará y seleccionará después en ChatGPT.

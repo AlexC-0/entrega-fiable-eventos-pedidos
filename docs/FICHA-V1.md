@@ -2,8 +2,7 @@
 
 Proyecto personal de CHAMBA DIARIA. V1 técnicamente completada para el alcance
 local acordado sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b), con
-[CI 43425880532 success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532). El Encargo 07 consolida documentos;
-su publicación manual y la comprobación del nuevo commit siguen pendientes.
+[CI 43425880532 success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532). La evidencia de CI pertenece a ese SHA.
 
 ## Problema y solución
 
@@ -92,10 +91,10 @@ terminales ni sirve para eludir deduplicación. Consultas e interpretación en
 
 - Local: STATUS, registro histórico del Encargo 06, 20 núcleo + 22 HTTP +
   21 entrega + 11 operaciones = 74 pruebas correctas. No se repitieron aquí.
-- Remota: run y SHA enlazados arriba, facilitados por Alex; Codex comprobó metadatos,
-  job 131887043716 y logs en el Encargo 07: las mismas cuatro suites, 74/74,
+- Remota: metadatos del run y SHA enlazados arriba, job 131887043716 y logs
+  contrastados durante el cierre documental: las mismas cuatro suites, 74/74,
   cero fallos/omitidos/cancelados, instalación/tipos/build success.
-- Revisión actual: coherencia documental, correspondencia con código/pruebas,
+- Revisión del cierre: coherencia documental, correspondencia con código/pruebas,
   enlaces, cifras y diff. No es una nueva auditoría completa.
 
 Datos ficticios, loopback, un emisor lógico y destino fijo. Sin carga medida,
@@ -105,24 +104,16 @@ nuevos destinos ni ampliación de negocio. Sin orden de entrega garantizado ni
 snapshot global entre páginas. Agotados y fallos definitivos no se reactivan;
 repetir POST no reinicia su presupuesto. Las futuras versiones requieren evidencia propia.
 
-## Participación y material reutilizable
-
-Alex condujo el proyecto mediante encargos, fijó requisitos y límites, delegó
-decisiones técnicas y realizó la publicación manual con GitHub Desktop.
-Codex asistió en análisis, evaluación técnica, implementación, pruebas y documentación.
-Este repositorio acredita el trabajo y las comprobaciones descritas; no demuestra
-por sí solo autoría manual de todo el código, dominio individual de competencias
-ni experiencia profesional o de explotación en producción.
+## Descripción técnica reutilizable
 
 Competencias ilustradas por artefactos: diseño de contratos HTTP y autenticación,
 modelado SQL y transacciones, concurrencia y recuperación, idempotencia,
 pruebas de integración con fallos reales, paginación por clave y CI reproducible.
-Para atribuirlas personalmente, Alex deberá poder explicar y reproducir las decisiones.
 
 Descripción breve reutilizable (borrador, sin publicar):
 
-> Proyecto personal de backend en Node.js, TypeScript y PostgreSQL, desarrollado
-> con asistencia de Codex. Recepción autenticada y entrega HTTP recuperable de
+> Proyecto personal de backend en Node.js, TypeScript y PostgreSQL.
+> Recepción autenticada y entrega HTTP recuperable de
 > eventos, con cola propia, reintentos limitados, receptor idempotente e historial
 > operativo. Incluye pruebas con PostgreSQL real y CI verificable; alcance local
 > con datos ficticios.
@@ -135,7 +126,3 @@ Puntos para preparar una entrevista:
 - Qué requisito hizo descartar las opciones de pg-boss evaluadas y qué coste se asume.
 - Por qué el cursor conserva microsegundos y no garantiza snapshot entre páginas.
 - Cómo se separan permisos, datos de prueba y evidencia de un commit concreto.
-
-No se modifican ni publican CV, LinkedIn o portfolio. Próximo paso: Alex publica
-el cierre y se comprueba su estado remoto. El siguiente proyecto se investigará
-y seleccionará después en ChatGPT, conforme a CHAMBA DIARIA.

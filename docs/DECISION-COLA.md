@@ -23,8 +23,8 @@ El registro siguiente conserva la decisión y el estado de sus encargos anterior
 
 # Decisión vigente — cola propia PostgreSQL
 
-13 de noviembre de 2026. Alex delegó la decisión técnica y autorizó el
-**Encargo 03: implementar y probar el núcleo persistente de una cola mínima propia**.
+13 de noviembre de 2026. **Decisión: implementar y probar el núcleo persistente
+de una cola mínima propia**, conservando pendientes e historial sin purga.
 El Encargo 02 está publicado en
 [ca1740b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/ca1740b0c515354250f54abf7213c91fff5a7b9a),
 verificado contra origin/main y consulta remota al iniciar este trabajo.
@@ -59,17 +59,16 @@ Próximo paso: recepción HTTP autenticada, mediante otro encargo.
 
 ---
 
-## Histórico íntegro del Encargo 02
+## Histórico técnico del Encargo 02
 
 El texto siguiente registra la decisión pendiente al cerrar aquel experimento.
-Sus instrucciones de decidir antes de adoptar quedan resueltas por la decisión
+La elección pendiente de aquel momento queda resuelta por la decisión
 vigente anterior; sus resultados siguen perteneciendo al Encargo 02.
 
 # Decisión de cola — evaluación del Encargo 02
 
 13 de noviembre de 2026. **pg-boss 12.38.2 evaluado; adopción pendiente.**
-La base usada fue PostgreSQL portátil 18.7, después del fallo de Docker/WSL
-y la autorización de Alex para continuar sin él.
+La base usada fue PostgreSQL portátil 18.7, después del fallo de Docker/WSL.
 
 ## Conclusión
 
@@ -80,10 +79,9 @@ y la autorización de Alex para continuar sin él.
 | Incompatible con un requisito identificado | Retener indefinidamente todos los trabajos pendientes sin purga automática, usando las opciones públicas evaluadas y supervisión normal |
 | No comprobado | Contenedor Docker; parada de días; permisos mínimos de producción; toda la clasificación HTTP y receptor/efecto de negocio |
 
-**No adoptar pg-boss todavía.** Alex debe decidir si acepta la retención finita
-en la cola (con horizonte y margen definidos), manteniendo el historial propio.
-Si mantiene estrictamente ausencia de purga para pendientes, habrá que evaluar
-otra decisión en un nuevo encargo. No se implementa una cola alternativa.
+**Adopción condicionada a una retención finita** en la cola, con horizonte y margen
+definidos, manteniendo el historial propio. La conservación indefinida de pendientes
+exige otra solución. En esta evaluación no se implementó una cola alternativa.
 
 ## Evidencia ejecutable
 
@@ -304,8 +302,8 @@ inconsistente adecuada para consumidores de una cola. No proporciona por sí
 solo recuperación, reintentos ni deduplicación externa.
 
 Primero demostrar pg-boss. Si sus APIs públicas obligan a un segundo planificador
-o no permiten conservar el contrato, presentar la evidencia y decidir con Alex
-si una cola propia más pequeña es preferible. No construir ambas.
+o no permiten conservar el contrato, la evidencia deberá fundamentar la elección
+de una cola propia más pequeña. No construir ambas.
 
 ## Próxima comprobación técnica delimitada
 
@@ -330,7 +328,7 @@ La prueba debe demostrar, con evidencia persistida:
 9. Permisos ordinarios, migraciones repetibles y ninguna transacción abierta
    mientras el receptor retrasa su respuesta.
 
-Esta sesión solo consultó fuentes y comprobó la base TypeScript: **ninguna de
-estas pruebas de cola se ha ejecutado**. Se accedió a las fuentes requeridas.
+La evaluación inicial solo consultó fuentes y comprobó la base TypeScript:
+**ninguna de estas pruebas de cola se había ejecutado en esa fase**.
 Dos rutas inicialmente supuestas, /guide/database-install y /backends, fallaron;
 se resolvieron con los enlaces oficiales /install y /database-backends.

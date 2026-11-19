@@ -2,17 +2,16 @@
 
 Proyecto 03 de CHAMBA DIARIA: `entrega-fiable-eventos-pedidos`.
 
-**V1 técnicamente completada dentro del alcance local acordado. Encargo 07: cierre documental.**
+**V1 técnicamente completada dentro del alcance local documentado.**
 API autenticada → evento persistido → trabajador HTTP → receptor idempotente →
 preparación ficticia → entrega confirmada. Los reenvíos pueden repetirse;
 la preparación de este receptor se deduplica dentro de su propia transacción.
 
 Repositorio de [AlexC-0](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos).
-Encargo 06 publicado en [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
-Evidencia facilitada por Alex y contrastada en este cierre con GitHub:
+Base técnica: [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
+Metadatos, job y logs de esa ejecución confirman:
 instalación reproducible, tipos, compilación y cuatro suites correctas.
-Los cambios documentales del Encargo 07 quedan sin staging para el commit y push
-manuales de Alex y la comprobación posterior de ese nuevo commit.
+La evidencia de CI corresponde exclusivamente al SHA enlazado.
 
 [Ficha de cierre y evidencias del proyecto](docs/FICHA-V1.md): alcance,
 arquitectura, decisión de cola, demo, límites y descripción reutilizable.
@@ -148,13 +147,13 @@ No se ejecuta sobre eventos del producto.
 - [Decisión de cola](docs/DECISION-COLA.md).
 - [Núcleo persistente](docs/NUCLEO-COLA.md).
 - [Trabajador, receptor y garantías](docs/ENTREGA.md).
-- [Instrucciones para Codex](AGENTS.md).
+- [Instrucciones de mantenimiento](AGENTS.md).
 
 [CI](docs/CI.md) ejecutada con éxito sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
 La [matriz de criterios](docs/CRITERIOS-V1.md) respalda el cierre técnico: 74 pruebas
 locales históricas y 74 en esa ejecución remota, con fuentes diferenciadas.
-Este encargo no repitió suites ni ejecutó la demostración.
+El cierre documental no repitió suites ni ejecutó la demostración.
 
 Sin reintento manual, purga, frontend, nuevos destinos ni despliegue.
-No se promete entrega universal exactamente una vez. Pendiente únicamente publicar
-este cierre documental y comprobar su nuevo commit; el run anterior conserva su SHA.
+No se promete entrega universal exactamente una vez. Las versiones posteriores
+requieren sus propias comprobaciones; el run anterior conserva su SHA.

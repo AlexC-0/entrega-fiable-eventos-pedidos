@@ -2,9 +2,9 @@
 
 Ejecución [43425880532](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532), intento 1, push a main:
 completed / success sobre [5dc65b41ba612493a3a96252f7718ad2a7d5bf3b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b).
-Alex facilitó esta evidencia desde ChatGPT. En el Encargo 07 Codex contrastó
-los metadatos públicos del run, el job verificar (131887043716), sus pasos y los
-resúmenes de logs; no lanzó ni repitió CI.
+El cierre documental contrastó los metadatos públicos del run, el job verificar
+(131887043716), sus pasos y los resúmenes de logs. La consulta de estos registros
+no ejecutó ni repitió CI.
 
 | Suite | Resultado remoto leído |
 | --- | --- |
@@ -16,8 +16,8 @@ resúmenes de logs; no lanzó ni repitió CI.
 74 casos, cero fallos, cancelados u omitidos. Instalación reproducible, preparación
 del contenedor, tipos y compilación también concluyeron success.
 Los 74 resultados locales anteriores se documentan por separado en [STATUS](STATUS.md).
-La evidencia pertenece a ese SHA; tras la publicación manual de este cierre habrá
-que comprobar el nuevo commit. No se considera cubierto por este run.
+La evidencia pertenece a ese SHA. Los commits posteriores requieren sus propias
+comprobaciones y no se consideran cubiertos por este run.
 
 ## Configuración publicada
 

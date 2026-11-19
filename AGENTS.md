@@ -1,42 +1,40 @@
-# Instrucciones para Codex — Proyecto 03
+# Instrucciones de mantenimiento — Proyecto 03
 
 ## Contexto y alcance vigente
 
 Trabaja exclusivamente en `entrega-fiable-eventos-pedidos`.
 No inspecciones, modifiques, copies ni integres los proyectos anteriores.
 Antes de modificar, confirma ruta, raíz Git, rama, remotos y
-`git status --short --branch`. Conserva cualquier trabajo posterior del usuario.
+`git status --short --branch`. Conserva cualquier cambio preexistente, incluido staging.
 Lee README.md, docs/PROJECT_BRIEF.md, docs/DECISION-COLA.md y docs/STATUS.md.
-Redacta principalmente en castellano. No hay sincronización automática con
-ChatGPT navegador.
+Redacta principalmente en castellano.
+Documentar únicamente objetivos, configuración, funcionalidades, decisiones,
+cambios, comprobaciones y limitaciones del proyecto. Utilizar redacción técnica
+directa. Excluir relatos de conversaciones, asignaciones personales, firmas
+automáticas y detalles internos de elaboración. Aplicar también a históricos,
+instrucciones y plantillas; conservar la autoría legítima y los créditos de terceros.
 
-Los Encargos 01–06 están publicados por Alex.
 V1 técnicamente completada dentro del alcance funcional y de ejecución local
 acordado sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
 74 pruebas: 20 núcleo, 22 HTTP, 21 entrega y 11 operaciones. La evidencia remota
-fue aportada por Alex y contrastada por Codex mediante metadatos, job y logs.
+se contrastó mediante metadatos, job y logs; los resultados locales son históricos.
 No atribuir esa ejecución a commits posteriores.
 
-El Encargo 07 es exclusivamente documental: consolidar cierre y evidencias,
-actualizar referencias y preparar una ficha reutilizable dentro del repositorio.
+El mantenimiento vigente es exclusivamente documental, sin reabrir V1.
 Leer también docs/CRITERIOS-V1.md, docs/CI.md, docs/OPERACION.md y docs/FICHA-V1.md.
 No cambiar código, pruebas, dependencias, lockfile, migraciones, CI, configuración
 ni datos. No arrancar PostgreSQL o servidores ni repetir suites para este cierre.
 Las garantías técnicas siguientes se conservan para futuros encargos explícitos;
 no amplían el alcance documental actual.
-Mantener históricos como históricos, distinguir resultados facilitados y
-comprobaciones propias, y revisar coherencia, enlaces, cifras y diff --check.
-Los cambios documentales quedan pendientes del commit y push manuales de Alex
-y de comprobar el nuevo commit, sin trasladarle la CI anterior.
+Mantener históricos como históricos, distinguir resultados registrados y
+comprobaciones nuevas, y revisar coherencia, enlaces, cifras y diff --check.
+Cada commit requiere su propia evidencia; no trasladarle la CI anterior.
 
 La cola propia PostgreSQL mantiene seis intentos, conservación sin purga y
 deduplicación transaccional en el receptor. pg-boss sigue solo como histórico.
 Sin carga/alta disponibilidad/redes externas comprobadas, frontend, despliegue,
 purga ni reintento manual. No modificar ni publicar CV, LinkedIn o portfolio.
-La ficha queda en el repositorio para revisión y publicación manual de Alex.
-Siguiente paso: Alex publica el cierre y se comprueba su estado remoto.
-La investigación y selección del siguiente proyecto será después en ChatGPT,
-conforme a CHAMBA DIARIA. No iniciarla ni avanzar automáticamente.
+La ficha reutilizable permanece en el repositorio. No iniciar otros proyectos.
 
 Conservar contrato de recepción, migraciones publicadas 001/002/003 y catálogo
 compartido con /listo. API solo con sus permisos de recepción y lectura de intentos;
@@ -128,8 +126,8 @@ Mantén .env, .local, resultados y compilados fuera de Git.
 ## Git y entrega
 
 Repositorio existente: AlexC-0/entrega-fiable-eventos-pedidos; rama principal main.
-Alex realiza exclusivamente staging, commits y push desde GitHub Desktop.
-Codex no ejecutará git init, add, commit, push, cambios de remoto, reescritura de
+No ejecutar staging, commit ni push; dejar los cambios preparados para revisión.
+No ejecutar git init, cambios de rama o remoto, reescritura de
 historial, tags, releases, publicación ni equivalentes por herramientas o API.
 No crear otro repositorio, cambiar visibilidad ni desplegar.
 Una petición genérica de terminar o publicar no modifica estas reglas.

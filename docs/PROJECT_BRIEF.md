@@ -11,8 +11,8 @@ El Encargo 06 incorporó listado paginado por estado, historial HTTP de intentos
 [operación](OPERACION.md), [matriz V1](CRITERIOS-V1.md) y [CI](CI.md).
 El Encargo 07 registra V1 técnicamente completada sobre [5dc65b4](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y [CI 43425880532: success](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/actions/runs/43425880532).
 Las pruebas y límites se consolidan en la [ficha de cierre](FICHA-V1.md).
-El cierre documental queda pendiente de publicación manual y comprobación de su
-nuevo commit; no se atribuye a ese futuro commit la ejecución anterior.
+La ejecución de CI corresponde exclusivamente al SHA enlazado; los commits
+posteriores requieren sus propias comprobaciones.
 
 ## Objetivo y límites
 
@@ -81,7 +81,7 @@ trabajador e impedir que ejecuciones antiguas sobrescriban resultados posteriore
 No mantener transacciones abiertas durante la espera HTTP.
 Separar ejecución de cola, reserva de intento y envío HTTP realmente observado.
 
-## Continuidad de encargos
+## Evolución técnica
 
 Encargo 01: base y propuesta. Encargo 02: experimento pg-boss publicado, conservado
 como histórico. Encargo 03: migraciones y núcleo propio con pruebas PostgreSQL.
@@ -92,5 +92,3 @@ Encargo 05: trabajador independiente y receptor idempotente, migración 002 y
 pruebas de recuperación, red y efecto único; publicado en f9a427a.
 Encargo 06: consultas, operación y CI; publicado en 5dc65b4, con run 43425880532 success.
 Encargo 07: cierre técnico documentado y evidencias, sin ampliar el producto.
-Siguiente paso: Alex publica este cierre y se comprueba el estado remoto.
-El siguiente proyecto se investigará y seleccionará después en ChatGPT.

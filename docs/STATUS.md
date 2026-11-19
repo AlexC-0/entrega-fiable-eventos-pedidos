@@ -1,4 +1,4 @@
-# Estado actual — Encargo 07: cierre documental de V1
+# Estado de V1 y evidencias
 
 13 de noviembre de 2026. **V1 técnicamente completada dentro del alcance acordado**
 sobre [5dc65b41ba612493a3a96252f7718ad2a7d5bf3b](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/5dc65b41ba612493a3a96252f7718ad2a7d5bf3b) y
@@ -6,25 +6,26 @@ sobre [5dc65b41ba612493a3a96252f7718ad2a7d5bf3b](https://github.com/AlexC-0/entr
 La revisión acotada no identificó discrepancia material que invalide la matriz.
 [Ficha de cierre](FICHA-V1.md), [criterios](CRITERIOS-V1.md) y [CI](CI.md).
 
-## Punto de partida y estado Git
+Estado documental comprobado el 19 de noviembre de 2026: `main` local y remoto
+coinciden en `a84fbd072107e179e284cd76cc9b93f40957b807`, que contiene el cierre
+documental. La CI enlazada corresponde a `5dc65b4`; no se atribuye a ese cierre
+ni a modificaciones posteriores. El siguiente control de una nueva versión es
+comprobar su SHA y las evidencias asociadas.
 
-Ruta y raíz comprobadas: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
-Rama main, inicio limpio (main...origin/main); HEAD, origin/main y consulta
-git ls-remote origin refs/heads/main coinciden en 5dc65b41ba612493a3a96252f7718ad2a7d5bf3b.
-Origin: https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
-El Encargo 06 está publicado por Alex. Sin restauraciones ni descarte de trabajo posterior.
+Comprobación documental del 19 de noviembre: inventario con `git ls-files`
+(84 archivos versionados, 13 Markdown, sin archivos nuevos publicables), UTF-8
+válido y 108 enlaces locales existentes. Revisión de diff y `git diff --check`
+sin incidencias; staging vacío. El catálogo conserva 20/22/21/11 casos declarados.
+No se ejecutaron suites, instalación, compilación, migraciones ni servicios;
+los resultados funcionales siguientes siguen siendo históricos.
 
-Final comprobado para revisión: misma rama/HEAD y nueve documentos modificados,
-sin staging. Alex realiza commit y push desde GitHub Desktop.
-No se ejecutaron publicaciones, cambios de remoto, tags, releases o despliegue.
+## Fuentes de evidencia del cierre técnico
 
-## Fuentes de evidencia y comprobación propia
-
-1. Alex facilitó en el encargo el run, SHA y resultado success, junto al desglose
-   local 20/22/21/11 del STATUS anterior.
-2. Codex consultó en este encargo los metadatos públicos del run: head_sha exacto,
-   push a main, intento 1, completed/success. También consultó el job verificar
-   131887043716, sus pasos y los resúmenes de logs mediante el conector GitHub.
+1. El registro local previo contiene el desglose 20/22/21/11. Los resultados
+   remotos se identifican por el run, SHA y resultado success enlazados arriba.
+2. Durante el cierre se consultaron los metadatos públicos del run: head_sha exacto,
+   push a main, intento 1, completed/success. También se consultaron el job verificar
+   131887043716, sus pasos y los resúmenes de logs en GitHub.
 3. Esos registros confirman instalación reproducible, preparación del contenedor,
    tipos, compilación y cuatro suites secuenciales correctas con PostgreSQL real.
    Se contrastó el workflow publicado, sin modificarlo ni volver a ejecutarlo.
@@ -48,14 +49,12 @@ perdida, consultas, permisos y secretos de la matriz; no es una auditoría compl
 Actualizados README, AGENTS, PROJECT_BRIEF, CRITERIOS-V1, CI, OPERACION y
 referencia vigente de ENTREGA; añadida FICHA-V1 y este registro en STATUS.
 La ficha enlaza el experimento histórico de pg-boss, la decisión de cola propia,
-comandos existentes de demo, evidencias y límites. Aclara la contribución de Alex
-y la asistencia de Codex, con borrador para portfolio/CV y puntos de entrevista.
-No atribuye experiencia profesional, usuarios, rendimiento o dominio individual.
-No se publicaron ni modificaron CV, LinkedIn o portfolio.
+comandos existentes de demo, evidencias y límites, con una descripción técnica
+reutilizable y preguntas sobre las decisiones de diseño.
 
-Se conserva el histórico completo de STATUS debajo; sus pendientes y resultados
+Se conserva el histórico técnico de STATUS debajo; sus pendientes y resultados
 describen el momento de cada encargo. Las referencias actuales se actualizaron.
-Se conservan sin cambios los históricos de evaluación y catálogos de pruebas.
+Los históricos de evaluación y catálogos de pruebas identifican cada fase.
 
 Garantía acotada: los envíos pueden repetirse; el receptor evita duplicar su
 preparación mediante identidad persistida y transacción propia. Sin promesa
@@ -63,7 +62,7 @@ universal exactamente una vez. Continúan los límites locales: datos ficticios,
 loopback, sin carga/alta disponibilidad/redes externas/TLS o apagones prolongados
 probados, sin auditoría exhaustiva. Sin frontend, despliegue, purga ni reintento manual.
 
-## Validación de este encargo
+## Validación histórica del cierre documental — 13 de noviembre de 2026
 
 Comprobaciones realizadas: estado Git y remoto, lectura de documentos, contraste
 selectivo con implementación/casos y workflow, consulta remota del run/job/logs,
@@ -79,37 +78,13 @@ credenciales. La parada y las dos preparaciones del cierre anterior son datos
 históricos, no un recuento nuevo de la base en este encargo.
 Ningún recurso de aplicación fue creado o arrancado por este trabajo.
 
-## Publicación y siguiente paso
-
-Pendiente: revisión de Alex, staging/commit/push manuales y comprobación del
-nuevo SHA y de su estado remoto. El cierre técnico se fundamenta en 5dc65b4;
-el futuro commit documental requiere su propia comprobación.
-Después, la investigación y selección del siguiente proyecto se realizará en
-ChatGPT conforme a CHAMBA DIARIA; no se inicia aquí.
-
-Summary:
-
-~~~text
-docs: cerrar V1 y consolidar evidencias verificables
-~~~
-
-Description:
-
-~~~text
-Registrar V1 técnicamente completada dentro del alcance local sobre 5dc65b4 y CI 43425880532 success.
-Contrastar matriz, implementación y pruebas existentes, distinguiendo 74 resultados locales históricos y 74 remotos.
-Actualizar estado, alcance e instrucciones y conservar los registros históricos.
-Añadir ficha de cierre con arquitectura, decisión de cola, demo, límites y material reutilizable con atribución precisa de Alex y Codex.
-Revisar coherencia, enlaces, cifras y diff sin cambiar código ni ejecutar suites o servicios.
-Dejar la publicación documental y comprobación del nuevo commit pendientes de Alex.
-~~~
-
 ---
 
-## Histórico íntegro anterior al Encargo 07
+## Histórico técnico anterior al cierre documental
 
-Los apartados siguientes conservan sus títulos, cifras y pendientes originales;
-no describen el estado vigente del cierre.
+Los apartados siguientes describen resultados y pendientes técnicos de cada fase;
+no describen el estado vigente del cierre. Los números de encargo identifican
+esas fases históricas.
 
 # Estado actual — Encargo 06
 
@@ -123,14 +98,6 @@ Ruta: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
 Inicio limpio en main...origin/main. HEAD, origin/main y git ls-remote coinciden:
 [f9a427adff420d26775cd1dab47f6a09cc7099e2](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/f9a427adff420d26775cd1dab47f6a09cc7099e2),
 «feat: añadir trabajador HTTP y receptor idempotente».
-Se registra la publicación del Encargo 05 por Alex. No se restauraron commits
-ni se descartaron cambios. Origin sigue siendo el repositorio exclusivo de AlexC-0.
-
-Final: misma rama y HEAD; todos los cambios locales sin staging.
-Codex no hizo staging, commit, push, cambios de remoto, tags, releases o despliegue.
-La primera consulta de Git remota desde el entorno restringido falló por credenciales
-Schannel; la consulta de solo lectura con permiso ampliado confirmó la referencia.
-No se inspeccionaron ni modificaron los proyectos anteriores.
 
 Los resultados siguientes son de este árbol local, no del commit f9a427a ni de CI.
 
@@ -235,8 +202,8 @@ Se comprobó configuración con actionlint; no se ejecutó el runner ni su SQL d
 preparación localmente. Sin Docker/WSL, secretos personales o permisos de escritura.
 Sin shellcheck/pyflakes locales: comandos y SQL revisados manualmente.
 
-Pendientes concretos: Alex revisa los cambios y publica manualmente; después se
-comprueba el run remoto del commit exacto y se revisa la matriz para aceptar V1.
+Pendientes en esa fase: ejecución remota de CI sobre el commit exacto y contraste
+de sus resultados con la matriz para aceptar V1.
 No hay bloqueo de implementación local. CI no se declara verde y V1 no se cierra.
 
 API, receptor, trabajador e instancia PostgreSQL propios detenidos. Se conservan
@@ -244,27 +211,6 @@ dos eventos entregados, dos preparaciones (una por pedido), historial y credenci
 Sin purga, reintento manual, frontend, nuevos destinos o despliegue.
 Agotados/fallos definitivos no se reactivan; repetir POST tampoco reinicia presupuesto.
 No se promete entrega universal exactamente una vez. Límites en [OPERACION](OPERACION.md).
-
-## Publicación manual sugerida
-
-Summary:
-
-~~~text
-feat: añadir consultas operativas y preparar CI con PostgreSQL
-~~~
-
-Description:
-
-~~~text
-Añadir listado de eventos por estado con paginación por clave y cursor preciso a microsegundos.
-Exponer historial autenticado de intentos con resultados y diagnósticos persistidos, sin datos internos.
-Incorporar migración 003 y conceder únicamente SELECT de intento al rol API.
-Añadir consulta local segura, guía operativa y matriz de criterios V1 pendientes de cierre.
-Preparar GitHub Actions con PostgreSQL 18.7, roles ordinarios y suites secuenciales.
-Verificar instalación reproducible, tipos, compilación y 74 pruebas locales con PostgreSQL/HTTP reales.
-Revisar workflow con actionlint; dejar su ejecución remota pendiente de publicación manual.
-Conservar datos y credenciales con los procesos propios detenidos.
-~~~
 
 ---
 
@@ -284,12 +230,6 @@ Inicio limpio en main...origin/main. HEAD, origin/main y consulta remota
 git ls-remote origin refs/heads/main coincidían en
 [522ca4113bcb4a738481a3d117e0490b3950d4bd](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/522ca4113bcb4a738481a3d117e0490b3950d4bd),
 «feat: añadir recepción HTTP autenticada y consulta de eventos».
-El Encargo 04 está publicado por Alex. No se restauró ni descartó trabajo posterior.
-
-Origin permanece https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
-Final: main y mismo HEAD; cambios locales sin staging, commit y push pendientes
-de Alex desde GitHub Desktop. No se ejecutó publicación, reescritura, tags,
-releases, despliegue ni CI nueva. No se inspeccionaron proyectos anteriores.
 
 Los resultados siguientes pertenecen a los cambios locales de este encargo,
 no al commit 522ca41 ni a una ejecución remota.
@@ -450,36 +390,11 @@ presenta como un apagado ordenado probado bajo todas las averías de PostgreSQL.
 arranque manual, demostración, inspección y parada.
 [ENTREGA](ENTREGA.md) documenta protocolo, Retry-After, diagnósticos y permisos.
 
-Sin bloqueos pendientes para este encargo.
 No se prueban rendimiento, alta disponibilidad, redes externas, TLS o apagones
 prolongados. Sin listado/paginación, historial por HTTP, reintento manual, purga,
 frontend, despliegue ni CI nueva. No se afirma entrega universal exactamente una vez.
 Próximo paso recomendado: revisión operativa y aceptación del recorrido local,
 incluyendo procedimientos ante agotamiento, mediante un nuevo encargo.
-
-### Publicación manual sugerida
-
-Summary:
-
-~~~text
-feat: añadir trabajador HTTP y receptor idempotente
-~~~
-
-Description:
-
-~~~text
-Implementar trabajador independiente con una petición por reserva, timeout total de 5 s y recibos limitados a 8 KiB.
-Clasificar respuestas y Retry-After conservando seis intentos y la política temporal existente.
-Añadir receptor autenticado con deduplicación y preparación ficticia en una transacción propia.
-Incorporar migración 002 y diagnósticos protegidos junto al estado y al historial, sin modificar 001.
-Preparar base y roles separados; ejecutar los procesos ordinarios sin DDL y conservar los permisos de la API.
-Añadir demostración completa, consulta local de preparaciones y cierre acotado de procesos.
-Verificar 20 pruebas de núcleo, 22 HTTP y 21 de entrega con PostgreSQL/HTTP reales.
-Demostrar respuesta perdida: dos envíos, una preparación y entrega confirmada.
-Actualizar documentación y conservar datos y secretos con los recursos detenidos.
-~~~
-
-Staging, commit y push quedan exclusivamente para Alex desde GitHub Desktop.
 
 ---
 
@@ -503,12 +418,6 @@ Inicio: main...origin/main limpio, sin cambios locales.
 HEAD, origin/main y git ls-remote origin refs/heads/main coincidían en
 [1ef64e872453875811111fda8840bd63193ef5c3](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/1ef64e872453875811111fda8840bd63193ef5c3),
 «feat: implementar núcleo de cola propia en PostgreSQL».
-El Encargo 03 está publicado por Alex. Origin sigue siendo
-https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
-
-Final: misma rama, HEAD y remoto; cambios locales sin staging.
-No se ejecutaron staging, commit, push, cambios de remotos, tags, publicación o
-despliegue. No se inspeccionaron ni modificaron proyectos anteriores.
 Los resultados de este apartado corresponden al árbol local del Encargo 04,
 no se atribuyen al commit previo ni a una CI remota.
 
@@ -647,35 +556,11 @@ No queda trabajador, servidor HTTP ni proceso hijo de prueba activo.
 Comandos de preparación, migración, arranque, demostración y parada en
 [README](../README.md); contrato y errores en [HTTP](HTTP.md).
 
-Sin bloqueos pendientes para este alcance.
 No hay trabajador/envío externo, receptor, historial por HTTP, listado/paginación,
 reintento manual, purga, panel, frontend, TLS/despliegue ni CI nueva.
 No se ha demostrado idempotencia del efecto en el receptor ni rendimiento bajo carga.
 No se usó navegador: la comprobación de la API fue por HTTP real.
-Próximo encargo: trabajador HTTP y receptor idempotente. No se inicia aquí.
-
-### Publicación manual sugerida
-
-Summary:
-
-~~~text
-feat: añadir recepción HTTP autenticada y consulta de eventos
-~~~
-
-Description:
-
-~~~text
-Añadir Express 5 con recepción y consulta individual mediante credenciales Bearer separadas.
-Validar el contrato cerrado de pedido.confirmado, JSON UTF-8 y límite de 64 KiB.
-Reutilizar el núcleo PostgreSQL y responder 202 únicamente tras COMMIT; reconocer duplicados y conflictos.
-Incorporar salud, disponibilidad y errores JSON seguros sin filtrar secretos.
-Preparar desarrollo separado con rol API sin DDL y migración explícita, conservando la migración 001.
-Añadir demostración reproducible y pruebas HTTP con PostgreSQL real, fallos SQL y reinicio de API.
-Verificar 20 pruebas de núcleo y 22 HTTP, instalación reproducible, tipos y compilación.
-Actualizar documentación y dejar los recursos detenidos con datos conservados.
-~~~
-
-Alex realiza exclusivamente staging, commit y push desde GitHub Desktop.
+Siguiente fase prevista entonces: trabajador HTTP y receptor idempotente.
 
 ---
 
@@ -688,8 +573,8 @@ publicación pendiente o ausencia de base de desarrollo describen aquella entreg
 
 ## Encargo 03 — núcleo persistente implementado y verificado
 
-13 de noviembre de 2026. Alex delegó la decisión y autorizó cola mínima propia
-PostgreSQL: conservar eventos, entregas e historial sin purga automática y mantener
+13 de noviembre de 2026. Decisión de cola mínima propia PostgreSQL:
+conservar eventos, entregas e historial sin purga automática y mantener
 seis intentos totales. pg-boss queda exclusivamente como experimento histórico.
 No se repite su evaluación ni se ejecuta sobre datos del producto.
 
@@ -701,11 +586,7 @@ Inicio limpio: main...origin/main, sin cambios pendientes.
 HEAD y origin/main coincidían con
 [ca1740b0c515354250f54abf7213c91fff5a7b9a](https://github.com/AlexC-0/entrega-fiable-eventos-pedidos/commit/ca1740b0c515354250f54abf7213c91fff5a7b9a),
 «test: evaluar pg-boss con PostgreSQL real».
-git ls-remote origin refs/heads/main confirmó ese mismo SHA en este encargo:
-el Encargo 02 ya está publicado por Alex. No se restauró ni reescribió nada.
-
-El cierre local mantiene main y ese HEAD. Cambios del Encargo 03 sin staging;
-commit y push pendientes de Alex desde GitHub Desktop.
+git ls-remote origin refs/heads/main confirmó ese mismo SHA en esa fase.
 Los resultados siguientes corresponden al árbol local actual, no al commit
 ca1740b ni a CI remota. El histórico inferior conserva el estado de cada entrega.
 
@@ -725,7 +606,6 @@ ca1740b ni a CI remota. El histórico inferior conserva el estado de cada entreg
 
 Se conservan sin cambios experiments/cola, scripts de PostgreSQL y Docker,
 compose.experiment.yml, .env.example y .gitattributes.
-No se inspeccionaron ni modificaron proyectos anteriores.
 
 ### Decisiones y garantías
 
@@ -812,7 +692,7 @@ No se creó un esquema de negocio permanente: solo esquemas de prueba ya limpiad
 Los comandos reproducibles de arranque, migración mediante fixtures, pruebas y
 parada están en [README](../README.md).
 
-Sin bloqueos pendientes para este encargo. No hay API/autenticación HTTP,
+En esa fase no hay API/autenticación HTTP,
 receptor, trabajador continuo, consultas HTTP, purga, reintento manual, prioridades,
 múltiples destinos ni garantía de orden. No se demuestra idempotencia del efecto
 en el receptor, entrega universal exactamente una vez, carga, alta disponibilidad
@@ -821,30 +701,7 @@ propio; no equivalen a permisos mínimos de producción.
 No se ejecutó HTTP/navegador: este núcleo no tiene interfaz.
 Sin CI nueva ni resultados remotos, tags, releases o despliegue.
 
-Siguiente encargo: recepción HTTP autenticada sobre este núcleo. No se inicia aquí.
-
-### Publicación manual sugerida
-
-Summary:
-
-~~~text
-feat: implementar núcleo de cola propia en PostgreSQL
-~~~
-
-Description:
-
-~~~text
-Añadir migraciones versionadas para eventos inmutables, entregas e intentos.
-Registrar eventos y reservar trabajo de forma atómica, con deduplicación y conflictos concurrentes.
-Proteger finalizaciones mediante token, número de intento y vencimiento con reloj PostgreSQL.
-Recuperar reservas interrumpidas conservando el historial y un máximo de seis intentos.
-Aplicar backoff de 5/10/20/40/80 s con jitter de 0–20 % y fecha mínima de reintento.
-Mantener pg-boss como experimento histórico y documentar la decisión y sus límites.
-Verificar 20 pruebas con PostgreSQL real en dos ejecuciones, incluida muerte de procesos.
-Comprobar instalación reproducible, tipos y compilación; detener la instancia propia conservando datos.
-~~~
-
-Alex revisará, hará staging, commit y push desde GitHub Desktop.
+Siguiente fase prevista entonces: recepción HTTP autenticada sobre este núcleo.
 
 ---
 
@@ -868,11 +725,7 @@ Ruta exclusiva: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
 Inicio limpio en main, HEAD y origin/main:
 34b953a31f013462258be9e6be419a4698f831f3 — Initial commit.
 Origin: https://github.com/AlexC-0/entrega-fiable-eventos-pedidos.git.
-git ls-remote origin refs/heads/main confirmó el mismo SHA remoto en esta sesión.
-El primer intento bajo sandbox falló por schannel/SEC_E_NO_CREDENTIALS; se repitió
-la lectura autorizada sin cambiar Git, remotos ni credenciales.
-
-Alex creó y publicó el repositorio desde GitHub Desktop tras el Encargo 01.
+git ls-remote origin refs/heads/main confirmó el mismo SHA remoto en esa fase.
 Inventario inicial: 13 archivos versionados, incluido .gitattributes creado
 por Desktop. Se conserva ese archivo sin cambios. El registro sin Git de la
 entrega original queda abajo como histórico, no como estado actual.
@@ -880,7 +733,7 @@ entrega original queda abajo como histórico, no como estado actual.
 Se amplía AGENTS únicamente para la prueba acotada. src/index.ts,
 PROJECT_BRIEF y la configuración TypeScript del producto se conservan.
 No se implementa API pública, autenticación, receptor de negocio, trabajador
-definitivo, otra cola ni CI. No se inspeccionan ni modifican proyectos anteriores.
+definitivo, otra cola ni CI.
 
 ### Entorno real y resolución del bloqueo
 
@@ -902,8 +755,8 @@ engine linux/wsl failed to start: checking preconditions: WSL update required.
 wsl --status informó que no podía iniciar el servicio y wsl --version no fue
 reconocido. No se actualizaron WSL, virtualización ni servicios del sistema.
 
-Alex autorizó continuar sin Docker. Se cerró Docker Desktop mediante
-docker desktop stop --timeout 15 y se descargó una copia nueva de PostgreSQL
+Se cerró Docker Desktop mediante docker desktop stop --timeout 15
+y se descargó una copia nueva de PostgreSQL
 dentro de .local/portable-postgres del Proyecto 03, sin instalación global.
 
 [ZIP oficial EDB](https://get.enterprisedb.com/postgresql/postgresql-18.7-1-windows-x64-binaries.zip)
@@ -947,7 +800,7 @@ El HTTP de laboratorio y el consumidor hijo solo forman parte del experimento.
 ### Comandos y resultados
 
 Prefijo de npm: npx --yes --package=npm@11.21.2 npm.
-La caché temporal p03-npm-cache se configuró solo para los procesos de esta sesión.
+La caché temporal p03-npm-cache se configuró solo para los procesos de verificación.
 
 | Comando | Resultado real |
 | --- | --- |
@@ -1033,32 +886,7 @@ Arranque y parada: run db:portable -- up / stop / status, con el prefijo npm.
 La preparación Docker queda como alternativa sin verificar; no usarla a la vez
 ni reemplazar .env privado sin revisar el cambio de entorno.
 
-### Git y publicación manual
-
-HEAD, rama main y origin conservados. Cambios locales sin staging; Codex no
-ejecutó init, add, commit, push, cambios de remoto ni publicación por API.
-La publicación del Encargo 02 queda pendiente de Alex en GitHub Desktop.
-
-Summary:
-
-~~~text
-test: evaluar pg-boss con PostgreSQL real
-~~~
-
-Description:
-
-~~~text
-Añade un experimento aislado de pg-boss con transacciones, reservas,
-recuperación tras muerte de proceso, protección de resultados e HTTP 503/429.
-
-Prepara PostgreSQL 18.7 portátil exclusivo tras el bloqueo de Docker/WSL.
-Verifica tipos, build, instalación reproducible y diez casos distintos,
-con dos ejecuciones de la suite PostgreSQL sin residuos.
-
-Demuestra el límite de retención de trabajos pendientes y deja la adopción
-de pg-boss pendiente de decidir esa política. Actualiza documentación,
-publicación inicial e instrucciones sin implementar la API de producto.
-~~~
+### Comprobaciones documentales
 
 Revisión final: 21 archivos publicables, UTF-8 válido, 15 enlaces locales
 existentes y cero coincidencias con las credenciales privadas propias.
@@ -1076,8 +904,7 @@ HEAD 34b953a y origin conservados; no hay resultados remotos del Encargo 02.
 ## Histórico conservado — Encargo 01
 
 Este bloque describe la entrega anterior a la creación del repositorio.
-Sus pendientes de creación/publicación quedaron resueltos por Alex, según
-la comprobación del Encargo 02.
+La creación del repositorio quedó comprobada al iniciar la evaluación de cola.
 
 ## Base inicial — 13 de noviembre de 2026
 
@@ -1086,22 +913,9 @@ implementarla. La definición funcional y pg-boss siguen como propuestas.
 
 ### Ruta y Git
 
-Inicio: el workspace de la sesión era
-C:\Users\kaosk\source\repos\gestion-solicitudes-aprobaciones.
-Se comprobó su raíz, rama main limpia y origin correspondiente al Proyecto 02;
-se leyó su documentación de contexto. No se modificó ni se copió implementación.
-No se inspeccionó el Proyecto 01.
-
-Destino: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
-No existía. Se comprobaron las rutas AGENTS.md de sus antecesores, sin encontrar
-archivos, y que C:\Users\kaosk\source\repos no pertenece a otro repositorio.
-Se creó la carpeta independiente, previa autorización técnica del sandbox para
-escribir fuera del workspace inicial. No hubo rechazo de revisión automática.
-
-Proyecto 03 sin Git: no hay rama, HEAD, staging, commits ni remoto configurado.
-No se ejecutó git init ni se creó un repositorio remoto. La ausencia del remoto
-procede del encargo de Alex, no de una consulta independiente a GitHub.
-Alex debe crear el repositorio en esta carpeta desde GitHub Desktop.
+Carpeta creada: C:\Users\kaosk\source\repos\entrega-fiable-eventos-pedidos.
+La base inicial aún no tenía repositorio Git local. En esa fase no se realizó
+una consulta independiente al remoto.
 
 ### Entorno comprobado
 
@@ -1114,7 +928,7 @@ Alex debe crear el repositorio en esta carpeta desde GitHub Desktop.
 | TypeScript | 7.0.2 instalado; tsc --version confirmado |
 | PostgreSQL local | psql, postgres y pg_ctl no encontrados en PATH; directorio habitual Program Files/PostgreSQL ausente |
 | Docker CLI | 29.9.3, build 5457199 |
-| Motor Docker | docker info no pudo conectar con docker_engine; configuración del cliente inaccesible desde sandbox |
+| Motor Docker | docker info no pudo conectar con docker_engine |
 
 Estas comprobaciones no prueban que PostgreSQL no exista en ninguna otra ruta
 ni que Docker esté averiado. No se buscaron binarios dentro de otros proyectos.
@@ -1129,10 +943,9 @@ Node 24 sigue en una [rama LTS](https://nodejs.org/en/about/previous-releases);
 no se actualizó el parche instalado. Configuración
 [NodeNext](https://www.typescriptlang.org/tsconfig/module.html) con target ES2024.
 
-La primera consulta npm falló con EPERM al escribir en la caché global fuera
-del sandbox. Se repitió usando npm_config_cache en TEMP/p03-npm-cache solo para
-los procesos de esta sesión, sin editar configuración global. Queda caché de
-herramientas en esa carpeta temporal; no forma parte de los archivos a publicar.
+La consulta npm utilizó npm_config_cache en TEMP/p03-npm-cache tras un error
+EPERM de la caché global. La configuración se limitó a esos procesos, sin cambios
+globales; la caché temporal no forma parte del producto.
 
 ### Archivos creados
 
@@ -1180,8 +993,8 @@ aplicación que arrancar. No se iniciaron servidores ni procesos persistentes.
 ### Cola, decisiones pendientes y próximo paso
 
 Recomendación condicionada: pg-boss 12.38.2 con PostgreSQL 18, según
-[DECISION-COLA](DECISION-COLA.md). Se consultaron las tres fuentes solicitadas y
-documentación adicional oficial. No se instaló ni ejecutó la cola.
+[DECISION-COLA](DECISION-COLA.md), basada en documentación oficial.
+No se instaló ni ejecutó la cola en esa fase.
 
 Pendientes: aprobación del contrato, definición de equivalencia, jitter y
 Retry-After; disponibilidad de PostgreSQL exclusivo; instalación y revisión del
@@ -1191,37 +1004,7 @@ antiguas; agotamiento sin handler y retención hasta conciliación.
 La base mínima no queda bloqueada. La compatibilidad de la integración real
 permanece sin demostrar. El siguiente paso técnico propuesto es un encargo
 acotado para ejecutar la prueba descrita en DECISION-COLA, antes de adoptar la
-cola o implementar recepción y trabajador. Esta sesión no lo inicia.
-
-### Publicación manual sugerida
-
-Nombre: entrega-fiable-eventos-pedidos.
-Rama prevista: main. Alex crea el repositorio local y remoto, revisa archivos
-y realiza staging, commit y push mediante GitHub Desktop.
-
-Summary:
-
-~~~text
-chore: preparar la base inicial del Proyecto 03
-~~~
-
-Description:
-
-~~~text
-Prepara un paquete privado Node.js y TypeScript con lockfile, ESM/NodeNext,
-comprobación de tipos y compilación.
-
-Documenta el alcance propuesto de recepción y entrega de eventos, las
-reglas de trabajo y la evaluación provisional de pg-boss frente a una
-cola propia PostgreSQL.
-
-Verifica instalación reproducible, conservación del lockfile, tipos y
-build. No implementa recepción, trabajador, reintentos ni receptor.
-Deja pendiente la prueba técnica de cola con PostgreSQL real.
-~~~
-
-La descripción del repositorio sugerida figura en [README](../README.md).
-No se crean tags, releases ni despliegues.
+cola o implementar recepción y trabajador.
 
 ### Revisión documental final
 
@@ -1236,11 +1019,4 @@ Revisadas exclusiones de node_modules, dist y archivos privados.
 .env.example conserva valores vacíos; .env y .git ausentes.
 No se afirma haber ejecutado una auditoría exhaustiva de secretos.
 
-Comprobación final de Proyecto 02 desde su propio workspace: main...origin/main
-limpio y git diff --check sin errores, remoto conservado. Un intento previo
-desde el directorio hermano fue rechazado por dubious ownership del usuario
-sandbox; se resolvió ejecutando la lectura desde el workspace original,
-sin cambiar safe.directory global.
-
 Proyecto 03 termina con carpeta y base local preparadas, sin Git ni publicación.
-La revisión y creación del repositorio, staging, commit y push quedan a Alex.
